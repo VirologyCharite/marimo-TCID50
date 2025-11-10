@@ -1,7 +1,22 @@
 import marimo
 
 __generated_with = "0.17.0"
-app = marimo.App(width="medium")
+app = marimo.App()
+
+
+@app.cell(hide_code=True)
+def _():
+    import marimo as mo
+    import pandas as pd
+    import altair as alt
+    import numpy as np
+    from scipy import stats
+    from sklearn.linear_model import LogisticRegression
+    import os
+    from pathlib import Path
+    import tomllib
+    import math
+    return alt, math, mo, np, pd, stats
 
 
 @app.cell(hide_code=True)
@@ -9,6 +24,7 @@ def _(mo):
     mo.md(
         r"""
     # TCID50 calculation
+    ## Input and calculation
     This marimo notebooks calculates the TCID50 from a CSV file of the following structure:
 
     ID | Dilution | CPE | Replicates 
@@ -23,8 +39,25 @@ def _(mo):
 
     where "ID" is a a unique value to identify the sample, "Dilution" is the dilution factor, "CPE" is the number of wells showing cyptopathic effect and "Replicates" is the total number of replicates for the sample and dilution.
 
-    The script will calculate the logit for the CPE probablity (linear transformation of logistic curve), determine the x-axis intercept (corresponding to p(CPE)=0.5) and generate a plot for each sample showing the transformed dose-response curve ( logit(p) ~ log10(p(CPE)) ).
+    The script will calculate the logit for the CPE probablity (linear transformation of logistic curve), determine the x-axis intercept (corresponding to p(CPE)=0.5)
     For each value without a valid regression (zero or all wells with CPE) it will set the value to 20% below or above the lowest or highest dilution. This has to be taken into account when visualizing the data.
+
+    ## Visualization
+    The script generates by default a logit(p(CPE))~log10(dilution) for each sample and saves it under the name of the input file suffixed with _logitplot.svg.
+    Optionally you can provide a sample sheet formated like the following table:
+
+    ID | x | color | facet_row | facet_col
+    ---|----------|-----|----------|
+      |  |  ...  | |
+
+    where x is the column that contains the values for the x-axis, color the values for the coloration of the datapoints, facet_row and facet_col the values according to which sub-plots should be generated. Note that the column headers should not be "x", "color", "facet_row", "facet_col", but can be the names of the actual parameters such as "Timepoint", "Infection", "Treatment" etc. You can select in the settings which column should be used for each aspect of the plot
+
+    ## Output
+    Output files (basename = input file without extension):
+    1. basename+"_TCID50.csv": Table with calculated TCID50 values and detection limits
+    2. basename+"_logit_plots.svg": All regression plots
+    3. basename+"_TCID50_overview.svg": Rough overview of log10(TCID50)/mL
+    4. basename+"_TCID50_fancy.svg": Fancy plot is sample sheet and grouping variables were provided
     """
     )
     return
@@ -43,112 +76,31 @@ def _(mo):
 
 @app.cell
 def _():
-    inputfile = "20251104_NE45G_TCID50.xlsx"
-    volume = 0.05 # mL
-    return inputfile, volume
+    inputfile = "20251104_NE45G_TCID50.xlsx"  # CPE counts formatted as shown above
+    volume = 0.05  # Volume of virus dilution/well in mL
+    samp_sheet = "NE45G_sample_sheet.xlsx"  # Sample sheet for fancy graph
+    x = "Timepoint"  # Name of column to use as x-axis values
+    color = "Infection"  # Name of column to use for color grouping
+    facet_row = ""  # name of column to create vertical subplots
+    facet_col = (
+        "Infection duration"  # name of column to create horizontal subplots
+    )
+    return color, facet_col, facet_row, inputfile, samp_sheet, volume, x
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-    ## Dose-Response curves for all samples
-    Y-axis (p(CPE)) is [logit](https://de.wikipedia.org/wiki/Logit)-transformed (linearisation of sigmoidalen functions)
-    """
-    )
+    mo.md(r"""## TCID50 calculation""")
     return
 
 
 @app.cell(hide_code=True)
-def _(alt, df, mo):
-    _points = (
-        alt.Chart(df)
-        .mark_point()
-        .encode(
-            x=alt.X("Dilution:Q").title("Dilution [log10]"), y=alt.Y("logit:Q")
-        )
-    )
-    _reg = _points.transform_regression(
-        "Dilution", "logit", groupby=["ID"]
-    ).mark_line(size=2)
-    _hline = (
-        alt.Chart()
-        .mark_rule(
-            color="red",
-        )
-        .encode(y=alt.datum(0))
-    )
-    _chart = (
-        (_points + _reg + _hline)
-        .properties(width=100, height=100)
-        .facet(column="ID")
-    )
-    mo.ui.altair_chart(_chart)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(
-        r"""
-    ## TCID50 for all samples
-    The following plot shows the log10(TCID50) for all samples. Points that fall outside the limit of detection are colored gray.
-    """
-    )
-    return
-
-
-@app.cell(hide_code=True)
-def _(alt, linreg, mo, np):
-    _linreg = linreg.copy()
-    _linreg["TCID50/mL"] = np.log10(_linreg["TCID50/mL"])
-    _chart = (
-        alt.Chart(_linreg.reset_index())
-        .mark_point()
-        .encode(
-            x="ID",
-            y=alt.Y("TCID50/mL").title("TCID50/mL (log10)").scale(zero=False),
-            color=alt.when(alt.datum.outside_detection == True).then(
-                alt.value("lightgray")
-            ),
-        )
-        .properties(height=100, width=20 + 12 * len(_linreg))
-    )
-    mo.ui.altair_chart(_chart)
-    return
-
-
-@app.cell(hide_code=True)
-def _():
-
-
-    return
-
-
-@app.cell(hide_code=True)
-def _():
-    import marimo as mo
-    import pandas as pd
-    import altair as alt
-    import numpy as np
-    from scipy import stats
-    from sklearn.linear_model import LogisticRegression
-    import os
-    from pathlib import Path
-    import tomllib
-    return alt, mo, np, pd, stats
-
-
-@app.cell
-def _():
-    return
-
-
-@app.cell(hide_code=True)
-def _(file_input, inputfile, np, pd, stats, volume):
+def _(inputfile, np, pd, stats, volume):
+    # read CPE values
     df = pd.read_excel(inputfile)
     df = df.set_index("ID")
-    output = "".join(file_input.value.split(".")[:-1]) + "_out.csv"
+
+    basename = "".join(inputfile.split(".")[:-1])
 
     # apply continuity correction to number of wells with CPE
     cpe_cont = (df["CPE"] + 0.5) / (df["Replicates"] + 1)
@@ -187,13 +139,188 @@ def _(file_input, inputfile, np, pd, stats, volume):
         linreg["Upper limit"] * 1.2
     )
     linreg.to_csv(
-        output,
+        basename + "_TCID50.csv",
     )
-    return df, linreg
+    return basename, df, linreg
 
 
-@app.cell
-def _():
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(
+        r"""
+    ## Dose-Response curves for all samples
+    Y-axis (p(CPE)) is [logit](https://de.wikipedia.org/wiki/Logit)-transformed (linearisation of sigmoidalen functions)
+    """
+    )
+    return
+
+
+@app.cell(hide_code=True)
+def _(alt, basename, df, mo):
+    _points = (
+        alt.Chart(df)
+        .mark_point()
+        .encode(
+            x=alt.X("Dilution:Q").title("Dilution [log10]"), y=alt.Y("logit:Q")
+        )
+    )
+    _reg = _points.transform_regression(
+        "Dilution", "logit", groupby=["ID"]
+    ).mark_line(size=2)
+    _hline = (
+        alt.Chart()
+        .mark_rule(
+            color="red",
+        )
+        .encode(y=alt.datum(0))
+    )
+    _chart = (
+        (_points + _reg + _hline)
+        .properties(width=100, height=100)
+        .facet(column="ID")
+    )
+    _chart.save(basename + "_logit_charts.svg")
+    mo.ui.altair_chart(_chart)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(
+        r"""
+    ## TCID50 for all samples
+    The following plot shows the log10(TCID50) for all samples. Points that fall outside the limit of detection are colored gray.
+    """
+    )
+    return
+
+
+@app.cell(hide_code=True)
+def _(alt, basename, linreg, np):
+    _linreg = linreg.copy()
+    _linreg["TCID50/mL"] = np.log10(_linreg["TCID50/mL"])
+    _chart = (
+        alt.Chart(_linreg.reset_index())
+        .mark_point()
+        .encode(
+            x="ID",
+            y=alt.Y("TCID50/mL").title("TCID50/mL (log10)").scale(zero=False),
+            color=alt.when(alt.datum.outside_detection == True).then(
+                alt.value("lightgray")
+            ),
+        )
+        .properties(height=100, width=20 + 12 * len(_linreg))
+    )
+    _chart.save(basename + "TCID50_overview.svg")
+    _chart
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(
+        r"""
+    ## Visualization according to sample sheet
+    The following plot attempts a visualiztion according to the sample sheet
+    """
+    )
+    return
+
+
+@app.cell(hide_code=True)
+def _(
+    alt,
+    basename,
+    color,
+    facet_col,
+    facet_row,
+    linreg,
+    math,
+    np,
+    pd,
+    samp_sheet,
+    x,
+):
+    df_sample_sheet = pd.read_excel(
+        samp_sheet,
+    )
+    df_sample_sheet = df_sample_sheet.merge(linreg, on="ID")
+    df_sample_sheet["TCID50/mL"] = np.log10(df_sample_sheet["TCID50/mL"])
+
+    limits = (
+        df_sample_sheet["Lower limit"].max(),
+        df_sample_sheet["Upper limit"].min(),
+    )
+
+    _domain = (
+        math.floor(df_sample_sheet["TCID50/mL"].min()),
+        math.ceil(df_sample_sheet["TCID50/mL"].max()),
+    )
+
+    _kwargs = {}
+    if color != "":
+        _kwargs["color"] = (
+            alt.Color(color)
+            .sort(df_sample_sheet[color].unique())
+            .scale(scheme="dark2")
+        )
+
+    _point = (
+        alt.Chart(df_sample_sheet)
+        .mark_point(clip=True)
+        .encode(
+            x=alt.X(x).sort(df_sample_sheet["Timepoint"].unique()),
+            y=alt.Y("TCID50/mL").scale(domain=_domain),
+            **_kwargs,
+        )
+    )
+    _line = (
+        alt.Chart(df_sample_sheet)
+        .mark_line(clip=True)
+        .encode(
+            x=alt.X(x).sort(df_sample_sheet["Timepoint"].unique()),
+            y=alt.Y("mean(TCID50/mL)")
+            .title("TCID50/mL (log10)")
+            .scale(domain=_domain),
+            **_kwargs,
+        )
+    )
+    _lower_limit = (
+        alt.Chart(
+            pd.DataFrame({"y1": 0.5 * _domain[0], "y2": [np.log10(limits[0])]})
+        )
+        .mark_rect(opacity=0.6, clip=True, color="WhiteSmoke")
+        .encode(y="y1:Q", y2="y2:Q")
+    )
+    _upper_limit = (
+        alt.Chart(
+            pd.DataFrame({"y1": [np.log10(limits[1])], "y2": 2 * _domain[1]})
+        )
+        .mark_rect(opacity=0.6, clip=True, color="WhiteSmoke")
+        .encode(y="y1:Q", y2="y2:Q")
+    )
+    _kwargs = {}
+    if facet_col != "":
+        _kwargs["column"] = alt.Column(facet_col)
+    if facet_row != "":
+        _kwargs["row"] = alt.Column(facet_row)
+
+    if len(_kwargs) > 0:
+        _chart = (
+            (_point + _line + _lower_limit + _upper_limit)
+            .properties(width=200, height=150)
+            .facet(**_kwargs)
+            .configure_facet(spacing=10)
+            .resolve_scale(x="independent")
+        )
+    else:
+        _chart = (
+            (_point + _line + _lower_limit + _upper_limit)
+            .properties(width=200, height=150)
+            .resolve_scale(x="independent")
+        )
+    _chart.save(basename + "TCID50_fancy.svg")
+    _chart
     return
 
 
