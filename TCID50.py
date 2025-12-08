@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.17.0"
-app = marimo.App()
+app = marimo.App(width="medium", app_title="TCID50 calculation")
 
 
 @app.cell(hide_code=True)
@@ -16,7 +16,9 @@ def _():
     from pathlib import Path
     import tomllib
     import math
-    return alt, math, mo, np, pd, stats
+    import io
+    import openpyxl
+    return alt, io, math, mo, np, pd, stats
 
 
 @app.cell(hide_code=True)
@@ -65,6 +67,39 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(mo):
+    mo.md(r"""## Input""")
+    return
+
+
+@app.cell(hide_code=True)
+def _(input_sample_sheet, input_tcid50, mo):
+    mo.vstack(
+        [
+            mo.md(
+                "Upload the TCID50 data file formatted as described above and, if you want fancy plots, also your sample sheet"
+            ),
+            mo.hstack(
+                [
+                    mo.vstack([mo.md("**TCID50 data file**"), input_tcid50]),
+                    mo.vstack(
+                        [mo.md("**sample sheet file**"), input_sample_sheet]
+                    ),
+                ]
+            ),
+        ]
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    input_tcid50 = mo.ui.file(filetypes=[".xlsx"])
+    input_sample_sheet = mo.ui.file(filetypes=[".xlsx"])
+    return input_sample_sheet, input_tcid50
+
+
+@app.cell(hide_code=True)
+def _(mo):
     mo.md(
         r"""
     ## Settings
@@ -75,17 +110,43 @@ def _(mo):
 
 
 @app.cell
-def _():
-    inputfile = "20251104_NE45G_TCID50.xlsx"  # CPE counts formatted as shown above
-    volume = 0.05  # Volume of virus dilution/well in mL
-    samp_sheet = "NE45G_sample_sheet.xlsx"  # Sample sheet for fancy graph
-    x = "Timepoint"  # Name of column to use as x-axis values
-    color = "Infection"  # Name of column to use for color grouping
-    facet_row = ""  # name of column to create vertical subplots
-    facet_col = (
-        "Infection duration"  # name of column to create horizontal subplots
+def _(color_col, facet_col_col, facet_row_col, mo, volume, x_col):
+    mo.vstack(
+        [
+            mo.md("### Settings for TCID50 calculation"),
+            volume,
+            mo.md("### Settings for fancy plot"),
+            mo.md(
+                "Select which columns of the sample sheet definde the X-axis, the color of the datapoints, and faceting by row and col (last 3 optional)"
+            ),
+            x_col,
+            color_col,
+            facet_row_col,
+            facet_col_col,
+        ]
     )
-    return color, facet_col, facet_row, inputfile, samp_sheet, volume, x
+    return
+
+
+@app.cell
+def _(df_sample_sheet, mo):
+    x_col = mo.ui.dropdown(options=df_sample_sheet.columns, label="X column")
+    color_col = mo.ui.dropdown(
+        options=df_sample_sheet.columns, label="Color column"
+    )
+    facet_row_col = mo.ui.dropdown(
+        options=df_sample_sheet.columns, label="Row facet column"
+    )
+    facet_col_col = mo.ui.dropdown(
+        options=df_sample_sheet.columns, label="Col facet column"
+    )
+    return color_col, facet_col_col, facet_row_col, x_col
+
+
+@app.cell
+def _(mo):
+    volume = mo.ui.number(start=0, stop=200, value=10, label="Volume / Well")
+    return (volume,)
 
 
 @app.cell(hide_code=True)
@@ -94,13 +155,13 @@ def _(mo):
     return
 
 
-@app.cell(hide_code=True)
-def _(inputfile, np, pd, stats, volume):
+@app.cell
+def _(input_tcid50, io, np, pd, stats, volume):
     # read CPE values
-    df = pd.read_excel(inputfile)
+    df = pd.read_excel(io.BytesIO(input_tcid50.contents()))
     df = df.set_index("ID")
 
-    basename = "".join(inputfile.split(".")[:-1])
+    basename = "".join(input_tcid50.name().split(".")[:-1])
 
     # apply continuity correction to number of wells with CPE
     cpe_cont = (df["CPE"] + 0.5) / (df["Replicates"] + 1)
@@ -109,7 +170,7 @@ def _(inputfile, np, pd, stats, volume):
     df["logit"] = np.log(cpe_cont / (1 - cpe_cont))
 
     # Apply volume to dilution
-    df["Dilution"] = df["Dilution"] / float(volume)
+    df["Dilution"] = df["Dilution"] / float(volume.value)
 
     lower_limit = df.groupby("ID")["Dilution"].min()
     upper_limit = df.groupby("ID")["Dilution"].max()
@@ -129,7 +190,7 @@ def _(inputfile, np, pd, stats, volume):
     linreg["Upper limit"] = linreg.index.map(upper_limit)
     linreg["Lower limit"] = linreg.index.map(lower_limit)
     linreg["TCID50/mL"] = 10 ** (-linreg["intercept"] / linreg["slope"])
-
+    # Improvemen: Calculate TCID for all (resulting in +- inf for the ones without slope) and then just check whether each sample is outside the detection range
     linreg.loc[(linreg["slope"] == 0), "outside_detection"] = True
     linreg.loc[linreg["outside_detection"].isna(), "outside_detection"] = False
     linreg.loc[(linreg["intercept"] < 0) & (linreg["slope"] == 0), "TCID50/mL"] = (
@@ -138,9 +199,7 @@ def _(inputfile, np, pd, stats, volume):
     linreg.loc[(linreg["intercept"] > 0) & (linreg["slope"] == 0), "TCID50/mL"] = (
         linreg["Upper limit"] * 1.2
     )
-    linreg.to_csv(
-        basename + "_TCID50.csv",
-    )
+    linreg
     return basename, df, linreg
 
 
@@ -155,7 +214,7 @@ def _(mo):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(alt, basename, df, mo):
     _points = (
         alt.Chart(df)
@@ -195,8 +254,8 @@ def _(mo):
     return
 
 
-@app.cell(hide_code=True)
-def _(alt, basename, linreg, np):
+@app.cell
+def _(alt, linreg, np):
     _linreg = linreg.copy()
     _linreg["TCID50/mL"] = np.log10(_linreg["TCID50/mL"])
     _chart = (
@@ -211,7 +270,6 @@ def _(alt, basename, linreg, np):
         )
         .properties(height=100, width=20 + 12 * len(_linreg))
     )
-    _chart.save(basename + "TCID50_overview.svg")
     _chart
     return
 
@@ -227,58 +285,65 @@ def _(mo):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
+def _():
+    return
+
+
+@app.cell
+def _(input_sample_sheet, io, linreg, np, pd):
+    df_sample_sheet = pd.read_excel(io.BytesIO(input_sample_sheet.contents()))
+    df_sample_sheet_merge = df_sample_sheet.merge(linreg, on="ID")
+    df_sample_sheet_merge["TCID50/mL"] = np.log10(
+        df_sample_sheet_merge["TCID50/mL"]
+    )
+    return df_sample_sheet, df_sample_sheet_merge
+
+
+@app.cell
 def _(
     alt,
-    basename,
-    color,
-    facet_col,
-    facet_row,
-    linreg,
+    color_col,
+    df_sample_sheet_merge,
+    facet_col_col,
+    facet_row_col,
     math,
     np,
     pd,
-    samp_sheet,
-    x,
+    x_col,
 ):
-    df_sample_sheet = pd.read_excel(
-        samp_sheet,
-    )
-    df_sample_sheet = df_sample_sheet.merge(linreg, on="ID")
-    df_sample_sheet["TCID50/mL"] = np.log10(df_sample_sheet["TCID50/mL"])
-
     limits = (
-        df_sample_sheet["Lower limit"].max(),
-        df_sample_sheet["Upper limit"].min(),
+        df_sample_sheet_merge["Lower limit"].max(),
+        df_sample_sheet_merge["Upper limit"].min(),
     )
 
     _domain = (
-        math.floor(df_sample_sheet["TCID50/mL"].min()),
-        math.ceil(df_sample_sheet["TCID50/mL"].max()),
+        math.floor(df_sample_sheet_merge["TCID50/mL"].min()),
+        math.ceil(df_sample_sheet_merge["TCID50/mL"].max()),
     )
 
     _kwargs = {}
-    if color != "":
+    if not color_col.value is None:
         _kwargs["color"] = (
-            alt.Color(color)
-            .sort(df_sample_sheet[color].unique())
+            alt.Color(color_col.value)
+            .sort(df_sample_sheet_merge[color_col.value].unique())
             .scale(scheme="dark2")
         )
 
     _point = (
-        alt.Chart(df_sample_sheet)
+        alt.Chart(df_sample_sheet_merge)
         .mark_point(clip=True)
         .encode(
-            x=alt.X(x).sort(df_sample_sheet["Timepoint"].unique()),
+            x=alt.X(x_col.value).sort(df_sample_sheet_merge[x_col.value].unique()),
             y=alt.Y("TCID50/mL").scale(domain=_domain),
             **_kwargs,
         )
     )
     _line = (
-        alt.Chart(df_sample_sheet)
+        alt.Chart(df_sample_sheet_merge)
         .mark_line(clip=True)
         .encode(
-            x=alt.X(x).sort(df_sample_sheet["Timepoint"].unique()),
+            x=alt.X(x_col.value).sort(df_sample_sheet_merge[x_col.value].unique()),
             y=alt.Y("mean(TCID50/mL)")
             .title("TCID50/mL (log10)")
             .scale(domain=_domain),
@@ -300,10 +365,10 @@ def _(
         .encode(y="y1:Q", y2="y2:Q")
     )
     _kwargs = {}
-    if facet_col != "":
-        _kwargs["column"] = alt.Column(facet_col)
-    if facet_row != "":
-        _kwargs["row"] = alt.Column(facet_row)
+    if not facet_col_col.value is None:
+        _kwargs["column"] = alt.Column(facet_col_col.value)
+    if not facet_row_col.value is None:
+        _kwargs["row"] = alt.Column(facet_row_col.value)
 
     if len(_kwargs) > 0:
         _chart = (
@@ -314,12 +379,9 @@ def _(
             .resolve_scale(x="independent")
         )
     else:
-        _chart = (
-            (_point + _line + _lower_limit + _upper_limit)
-            .properties(width=200, height=150)
-            .resolve_scale(x="independent")
+        _chart = (_point + _line + _lower_limit + _upper_limit).properties(
+            width=200, height=150
         )
-    _chart.save(basename + "TCID50_fancy.svg")
     _chart
     return
 
