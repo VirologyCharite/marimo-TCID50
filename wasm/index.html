@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="./favicon.ico" />
+    <!-- Preload is necessary because we show these images when we disconnect from the server,
+    but at that point we cannot load these images from the server -->
+    <link rel="preload" href="./assets/gradient-yHQUC_QB.png" as="image" />
+    <link rel="preload" href="./assets/noise-60BoTA8O.png" as="image" />
+    <!-- Preload the fonts -->
+    <link rel="preload" href="./assets/Lora-VariableFont_wght-B2ootaw-.ttf" as="font" crossorigin="anonymous" />
+    <link rel="preload" href="./assets/PTSans-Regular-CxL0S8W7.ttf" as="font" crossorigin="anonymous" />
+    <link rel="preload" href="./assets/PTSans-Bold-D9fedIX3.ttf" as="font" crossorigin="anonymous" />
+    <link rel="preload" href="./assets/FiraMono-Regular-BTCkDNvf.ttf" as="font" crossorigin="anonymous" />
+    <link rel="preload" href="./assets/FiraMono-Medium-DU3aDxX5.ttf" as="font" crossorigin="anonymous" />
+    <link rel="preload" href="./assets/FiraMono-Bold-CLVRCuM9.ttf" as="font" crossorigin="anonymous" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="a marimo app" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="manifest" href="./manifest.json" />
+
+    <script data-marimo="true">
+      function __resizeIframe(obj) {
+        var scrollbarHeight = 20; // Max between windows, mac, and linux
+
+        function setHeight() {
+          // Guard against race condition where iframe isn't ready
+          if (!obj.contentWindow?.document?.documentElement) {
+            return;
+          }
+          var element = obj.contentWindow.document.documentElement;
+          // If there is no vertical scrollbar, we don't need to resize the iframe
+          if (element.scrollHeight === element.clientHeight) {
+            return;
+          }
+
+          // Create a new height that includes the scrollbar height if it's visible
+          var hasHorizontalScrollbar = element.scrollWidth > element.clientWidth;
+          var newHeight = element.scrollHeight + (hasHorizontalScrollbar ? scrollbarHeight : 0);
+
+          // Only update the height if it's different from the current height
+          if (obj.style.height !== `${newHeight}px`) {
+            obj.style.height = `${newHeight}px`;
+          }
+        }
+
+        // Resize the iframe to the height of the content and bottom scrollbar height
+        setHeight();
+
+        // Resize the iframe when the content changes
+        const resizeObserver = new ResizeObserver((entries) => {
+          setHeight();
+        });
+        // Only observe if iframe content is ready
+        if (obj.contentWindow?.document?.body) {
+          resizeObserver.observe(obj.contentWindow.document.body);
+        }
+      }
+    </script>
+    <marimo-filename hidden>notebook.py</marimo-filename>
+    <!-- TODO(Trevor): Legacy, required by VS Code plugin. Remove when plugin is updated (see marimo/server/_templates/template.py) -->
+    <marimo-version data-version="{{ version }}" hidden></marimo-version>
+    <marimo-user-config data-config="{{ user_config }}" hidden></marimo-user-config>
+    <marimo-server-token data-token="{{ server_token }}" hidden></marimo-server-token>
+    <!-- /TODO -->
+    <title>TCID50 calculation</title>
+    <script type="module" crossorigin src="./assets/index-CmLKiEd5.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/preload-helper-DImqtvgl.js">
+    <link rel="modulepreload" crossorigin href="./assets/chunk-DZLz74EQ.js">
+    <link rel="modulepreload" crossorigin href="./assets/react-BcIddLXZ.js">
+    <link rel="modulepreload" crossorigin href="./assets/jsx-runtime-DvsdsEjx.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-CLazWf1X.js">
+    <link rel="modulepreload" crossorigin href="./assets/react-dom-D6bRRS5R.js">
+    <link rel="modulepreload" crossorigin href="./assets/namespace-Cw55ynVb.js">
+    <link rel="modulepreload" crossorigin href="./assets/cn-CwmWKpZ_.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-BiHHvE7B.js">
+    <link rel="modulepreload" crossorigin href="./assets/menu-items-CE6I2UvI.js">
+    <link rel="modulepreload" crossorigin href="./assets/useEventListener-g9rPKvBX.js">
+    <link rel="modulepreload" crossorigin href="./assets/tslib.es6-C9vXkBtU.js">
+    <link rel="modulepreload" crossorigin href="./assets/fullscreen-DoREeXhW.js">
+    <link rel="modulepreload" crossorigin href="./assets/events-BGfCi1Xy.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-DT6vyuIM.js">
+    <link rel="modulepreload" crossorigin href="./assets/createLucideIcon-Dz-D6iuz.js">
+    <link rel="modulepreload" crossorigin href="./assets/check-CmOWIaur.js">
+    <link rel="modulepreload" crossorigin href="./assets/select-DIqNYEaz.js">
+    <link rel="modulepreload" crossorigin href="./assets/accordion-D8h6M7fo.js">
+    <link rel="modulepreload" crossorigin href="./assets/chevron-right-kGH9aJGk.js">
+    <link rel="modulepreload" crossorigin href="./assets/dropdown-menu-D3tww20d.js">
+    <link rel="modulepreload" crossorigin href="./assets/tooltip-CW-4dtRh.js">
+    <link rel="modulepreload" crossorigin href="./assets/Logger-BkkOJyg0.js">
+    <link rel="modulepreload" crossorigin href="./assets/hotkeys-ZAWHeY7d.js">
+    <link rel="modulepreload" crossorigin href="./assets/react-7g8sREeT.js">
+    <link rel="modulepreload" crossorigin href="./assets/_Uint8Array-D5Z9rM2X.js">
+    <link rel="modulepreload" crossorigin href="./assets/_getTag-CVRrQL_Q.js">
+    <link rel="modulepreload" crossorigin href="./assets/_baseIsEqual-BF8660ot.js">
+    <link rel="modulepreload" crossorigin href="./assets/invariant-B43sqCFA.js">
+    <link rel="modulepreload" crossorigin href="./assets/isArrayLikeObject-DKyJYtr8.js">
+    <link rel="modulepreload" crossorigin href="./assets/merge-BgA7kxZb.js">
+    <link rel="modulepreload" crossorigin href="./assets/zod-U2NFpcFA.js">
+    <link rel="modulepreload" crossorigin href="./assets/utils-DLuqCLqV.js">
+    <link rel="modulepreload" crossorigin href="./assets/requests-BW3DqHQI.js">
+    <link rel="modulepreload" crossorigin href="./assets/once-4nUTgcVU.js">
+    <link rel="modulepreload" crossorigin href="./assets/toDate-BNd9AHNi.js">
+    <link rel="modulepreload" crossorigin href="./assets/_baseSlice-B27Cqkm6.js">
+    <link rel="modulepreload" crossorigin href="./assets/_arrayMap-DQI2GUNb.js">
+    <link rel="modulepreload" crossorigin href="./assets/isSymbol-xTSywenE.js">
+    <link rel="modulepreload" crossorigin href="./assets/toString-CBnct2wx.js">
+    <link rel="modulepreload" crossorigin href="./assets/_hasUnicode-CPHpt5EV.js">
+    <link rel="modulepreload" crossorigin href="./assets/upperFirst-DOlTOwhh.js">
+    <link rel="modulepreload" crossorigin href="./assets/capitalize-CkrfIDeS.js">
+    <link rel="modulepreload" crossorigin href="./assets/ai-model-dropdown-D-i9tuGn.js">
+    <link rel="modulepreload" crossorigin href="./assets/documentation-B7z6bB-t.js">
+    <link rel="modulepreload" crossorigin href="./assets/badge-Cbb7s63B.js">
+    <link rel="modulepreload" crossorigin href="./assets/button-g1jf7cM6.js">
+    <link rel="modulepreload" crossorigin href="./assets/use-toast-BKA5A0CC.js">
+    <link rel="modulepreload" crossorigin href="./assets/constants-Cv7-oioA.js">
+    <link rel="modulepreload" crossorigin href="./assets/Deferred-Mppm0cvJ.js">
+    <link rel="modulepreload" crossorigin href="./assets/config-BeIk_wvs.js">
+    <link rel="modulepreload" crossorigin href="./assets/uuid-4lb_EYpq.js">
+    <link rel="modulepreload" crossorigin href="./assets/key-Pb6bybhb.js">
+    <link rel="modulepreload" crossorigin href="./assets/connection-UyRAkvTk.js">
+    <link rel="modulepreload" crossorigin href="./assets/useLifecycle-DmdhGVVs.js">
+    <link rel="modulepreload" crossorigin href="./assets/useNonce-DvpkYOW9.js">
+    <link rel="modulepreload" crossorigin href="./assets/useTheme-BWXNjHkw.js">
+    <link rel="modulepreload" crossorigin href="./assets/createReducer-CFr1RdS2.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-BNtnpgX8.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-B8v7AWk6.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-Ct0a8Isf.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-AWYmVWdt.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-Q2QzNScK.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-BFifaB39.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-D80s9YgJ.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-Nl79A0iO.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-CtJ8WONl.js">
+    <link rel="modulepreload" crossorigin href="./assets/stex-w1KpyykF.js">
+    <link rel="modulepreload" crossorigin href="./assets/_baseProperty-CIKnF2iY.js">
+    <link rel="modulepreload" crossorigin href="./assets/toNumber-CTOPJrpu.js">
+    <link rel="modulepreload" crossorigin href="./assets/now-B6JN1xKT.js">
+    <link rel="modulepreload" crossorigin href="./assets/debounce-70y9MzDK.js">
+    <link rel="modulepreload" crossorigin href="./assets/toInteger-Bor4StOs.js">
+    <link rel="modulepreload" crossorigin href="./assets/type-CYsuWFDa.js">
+    <link rel="modulepreload" crossorigin href="./assets/marked.esm-BB_RKOA5.js">
+    <link rel="modulepreload" crossorigin href="./assets/main-CCaZmKLi.js">
+    <link rel="modulepreload" crossorigin href="./assets/cells-BEhFXxEH.js">
+    <link rel="modulepreload" crossorigin href="./assets/kbd-CrDndhyw.js">
+    <link rel="modulepreload" crossorigin href="./assets/renderShortcut-Bjp5Xukk.js">
+    <link rel="modulepreload" crossorigin href="./assets/useEvent-itkPNnCe.js">
+    <link rel="modulepreload" crossorigin href="./assets/useDeleteCell-CIqS2s5l.js">
+    <link rel="modulepreload" crossorigin href="./assets/icons-15z_NdNZ.js">
+    <link rel="modulepreload" crossorigin href="./assets/spinner-fS9J74Ro.js">
+    <link rel="modulepreload" crossorigin href="./assets/datasource-CwGVmPnG.js">
+    <link rel="modulepreload" crossorigin href="./assets/add-missing-import-0FwDfOhv.js">
+    <link rel="modulepreload" crossorigin href="./assets/ansi_up-CAiCs1Gk.js">
+    <link rel="modulepreload" crossorigin href="./assets/blob-BC4M7Onc.js">
+    <link rel="modulepreload" crossorigin href="./assets/dom-Ckypy4pz.js">
+    <link rel="modulepreload" crossorigin href="./assets/errors-CmwnOe1B.js">
+    <link rel="modulepreload" crossorigin href="./assets/extends-B47kqttt.js">
+    <link rel="modulepreload" crossorigin href="./assets/objectWithoutPropertiesLoose-ClrKK0Xi.js">
+    <link rel="modulepreload" crossorigin href="./assets/esm-Bp1Lbm07.js">
+    <link rel="modulepreload" crossorigin href="./assets/es-Ctpp-mTr.js">
+    <link rel="modulepreload" crossorigin href="./assets/play-C5VC4Hal.js">
+    <link rel="modulepreload" crossorigin href="./assets/sparkles-DLotTEZ2.js">
+    <link rel="modulepreload" crossorigin href="./assets/shim-FF_l0CN4.js">
+    <link rel="modulepreload" crossorigin href="./assets/add-cell-with-ai-BQY4AwHL.js">
+    <link rel="modulepreload" crossorigin href="./assets/ErrorBoundary-Bj7QJPi8.js">
+    <link rel="modulepreload" crossorigin href="./assets/alert-dialog-DiIW1jDy.js">
+    <link rel="modulepreload" crossorigin href="./assets/dialog-gSaRWBIN.js">
+    <link rel="modulepreload" crossorigin href="./assets/useDebounce-BZnPO5jA.js">
+    <link rel="modulepreload" crossorigin href="./assets/numbers-P4hvbAnW.js">
+    <link rel="modulepreload" crossorigin href="./assets/context-BwP_-Md9.js">
+    <link rel="modulepreload" crossorigin href="./assets/useNumberFormatter-BQOmTFFk.js">
+    <link rel="modulepreload" crossorigin href="./assets/input-DGY-1Oes.js">
+    <link rel="modulepreload" crossorigin href="./assets/ImperativeModal-DSAh6fUR.js">
+    <link rel="modulepreload" crossorigin href="./assets/filename-dpoTdlj9.js">
+    <link rel="modulepreload" crossorigin href="./assets/cell-link-D8x9Ez3U.js">
+    <link rel="modulepreload" crossorigin href="./assets/alert-D4GhiyiD.js">
+    <link rel="modulepreload" crossorigin href="./assets/links-DH7hmhHO.js">
+    <link rel="modulepreload" crossorigin href="./assets/state-5DtoeNLQ.js">
+    <link rel="modulepreload" crossorigin href="./assets/MarimoErrorOutput-CD3rG7IK.js">
+    <link rel="modulepreload" crossorigin href="./assets/copy-BxPDuBrN.js">
+    <link rel="modulepreload" crossorigin href="./assets/copy-CGWkBrzb.js">
+    <link rel="modulepreload" crossorigin href="./assets/copy-icon-7_c6G_tO.js">
+    <link rel="modulepreload" crossorigin href="./assets/RenderHTML-B398JcWn.js">
+    <link rel="modulepreload" crossorigin href="./assets/emotion-is-prop-valid.esm-Tm8TdcWf.js">
+    <link rel="modulepreload" crossorigin href="./assets/with-selector-ChXsBWGQ.js">
+    <link rel="modulepreload" crossorigin href="./assets/JsonOutput-BU4PIFXg.js">
+    <link rel="modulepreload" crossorigin href="./assets/_arrayReduce-DDpPg0Qh.js">
+    <link rel="modulepreload" crossorigin href="./assets/startCase-DOk4LYuA.js">
+    <link rel="modulepreload" crossorigin href="./assets/strings-CrHTFiMt.js">
+    <link rel="modulepreload" crossorigin href="./assets/command-W6QvsWS0.js">
+    <link rel="modulepreload" crossorigin href="./assets/popover-IOch2AIR.js">
+    <link rel="modulepreload" crossorigin href="./assets/table-CMFDmrFM.js">
+    <link rel="modulepreload" crossorigin href="./assets/tabs-CswUuyA0.js">
+    <link rel="modulepreload" crossorigin href="./assets/useAsyncData-BB0ZlY9B.js">
+    <link rel="modulepreload" crossorigin href="./assets/LazyAnyLanguageCodeMirror-CInCxHCy.js">
+    <link rel="modulepreload" crossorigin href="./assets/error-banner-CHF-jGs2.js">
+    <link rel="modulepreload" crossorigin href="./assets/defaultLocale-DEWTIUVh.js">
+    <link rel="modulepreload" crossorigin href="./assets/precisionRound-BLxyDkD7.js">
+    <link rel="modulepreload" crossorigin href="./assets/defaultLocale-B9-NA0ur.js">
+    <link rel="modulepreload" crossorigin href="./assets/vega-loader.browser.module-B3yPAbRZ.js">
+    <link rel="modulepreload" crossorigin href="./assets/loader-BcHzCbiy.js">
+    <link rel="modulepreload" crossorigin href="./assets/formats-Dbfcbsil.js">
+    <link rel="modulepreload" crossorigin href="./assets/en-US-D7J6fBFv.js">
+    <link rel="modulepreload" crossorigin href="./assets/isValid-BxWQIw0s.js">
+    <link rel="modulepreload" crossorigin href="./assets/dates-D2l0yAKQ.js">
+    <link rel="modulepreload" crossorigin href="./assets/download-RtEDTktT.js">
+    <link rel="modulepreload" crossorigin href="./assets/maps-duCv2i7k.js">
+    <link rel="modulepreload" crossorigin href="./assets/useDateFormatter-BapFytxP.js">
+    <link rel="modulepreload" crossorigin href="./assets/range-BB1DXJJn.js">
+    <link rel="modulepreload" crossorigin href="./assets/list-filter-DQ2_e3bh.js">
+    <link rel="modulepreload" crossorigin href="./assets/columns-BeFC1dXm.js">
+    <link rel="modulepreload" crossorigin href="./assets/focus-BP3h9dJJ.js">
+    <link rel="modulepreload" crossorigin href="./assets/useInstallPackage-CDwTdPy7.js">
+    <link rel="modulepreload" crossorigin href="./assets/column-preview-CC6unPyM.js">
+    <link rel="modulepreload" crossorigin href="./assets/useAddCell-ClSRUhA6.js">
+    <link rel="modulepreload" crossorigin href="./assets/toggle-DL9DPBMc.js">
+    <link rel="modulepreload" crossorigin href="./assets/useHotkey-CivJpvvx.js">
+    <link rel="modulepreload" crossorigin href="./assets/globals-BGEnYYSz.js">
+    <link rel="modulepreload" crossorigin href="./assets/mode-kUHLEZT6.js">
+    <link rel="modulepreload" crossorigin href="./assets/share-ChWJhz87.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-I8SxGjN9.js">
+    <link rel="modulepreload" crossorigin href="./assets/memoize-CAcr7Wct.js">
+    <link rel="modulepreload" crossorigin href="./assets/_toKey-Di_xoXjD.js">
+    <link rel="modulepreload" crossorigin href="./assets/_baseSet-Dmzd-CnA.js">
+    <link rel="modulepreload" crossorigin href="./assets/utilities.esm-Dj3BexHh.js">
+    <link rel="modulepreload" crossorigin href="./assets/floating-outline-CwHsH4x8.js">
+    <link rel="modulepreload" crossorigin href="./assets/eye-off-wMFrY47K.js">
+    <link rel="modulepreload" crossorigin href="./assets/plus-Ckxr6pwY.js">
+    <link rel="modulepreload" crossorigin href="./assets/readonly-python-code-DI18L7Ip.js">
+    <link rel="modulepreload" crossorigin href="./assets/file-video-camera-D5oKA5-e.js">
+    <link rel="modulepreload" crossorigin href="./assets/file-text-Ds68BFYI.js">
+    <link rel="modulepreload" crossorigin href="./assets/file-BX8VjCCQ.js">
+    <link rel="modulepreload" crossorigin href="./assets/types-Zo5TA9DG.js">
+    <link rel="modulepreload" crossorigin href="./assets/label-CFxcdBki.js">
+    <link rel="modulepreload" crossorigin href="./assets/form-mBAxBzPt.js">
+    <link rel="modulepreload" crossorigin href="./assets/textarea-BcNYHZLG.js">
+    <link rel="modulepreload" crossorigin href="./assets/circle-x-CPCvpiTN.js">
+    <link rel="modulepreload" crossorigin href="./assets/refresh-ccw-D1hQMnx_.js">
+    <link rel="modulepreload" crossorigin href="./assets/trash-2-Cex53SxB.js">
+    <link rel="modulepreload" crossorigin href="./assets/form-CN-qI0dC.js">
+    <link rel="modulepreload" crossorigin href="./assets/field-D-WfasXC.js">
+    <link rel="modulepreload" crossorigin href="./assets/switch-C2Bk9ykO.js">
+    <link rel="modulepreload" crossorigin href="./assets/useBoolean-7LAl9weo.js">
+    <link rel="modulepreload" crossorigin href="./assets/useDeepCompareMemoize-CbO9MTKn.js">
+    <link rel="modulepreload" crossorigin href="./assets/types-TRUculCV.js">
+    <link rel="modulepreload" crossorigin href="./assets/prop-types-ShpF60yB.js">
+    <link rel="modulepreload" crossorigin href="./assets/es-W4OhtMWM.js">
+    <link rel="modulepreload" crossorigin href="./assets/VisuallyHidden-BfudlHw2.js">
+    <link rel="modulepreload" crossorigin href="./assets/_baseFlatten-8yEsQJi9.js">
+    <link rel="modulepreload" crossorigin href="./assets/get-BYzWDFJH.js">
+    <link rel="modulepreload" crossorigin href="./assets/hasIn-WaG0qjy7.js">
+    <link rel="modulepreload" crossorigin href="./assets/_basePickBy-6ZBTv_cn.js">
+    <link rel="modulepreload" crossorigin href="./assets/pick-BZA77Trx.js">
+    <link rel="modulepreload" crossorigin href="./assets/square-DpWGO_-7.js">
+    <link rel="modulepreload" crossorigin href="./assets/chart-no-axes-column-3piSAXMi.js">
+    <link rel="modulepreload" crossorigin href="./assets/download-CHejLEQn.js">
+    <link rel="modulepreload" crossorigin href="./assets/globe-TqnwljOq.js">
+    <link rel="modulepreload" crossorigin href="./assets/send-D9MERKWw.js">
+    <link rel="modulepreload" crossorigin href="./assets/refresh-cw-CmHE3eNl.js">
+    <link rel="modulepreload" crossorigin href="./assets/settings-ByREbWaw.js">
+    <link rel="modulepreload" crossorigin href="./assets/square-function-B5j-8u3J.js">
+    <link rel="modulepreload" crossorigin href="./assets/bundle.esm-BoludFkg.js">
+    <link rel="stylesheet" crossorigin href="./assets/documentation-BvrC6Bsv.css">
+    <link rel="stylesheet" crossorigin href="./assets/columns-j3zW187k.css">
+    <link rel="stylesheet" crossorigin href="./assets/index-DrbV-Ps3.css">
+  <marimo-wasm hidden=""></marimo-wasm>
+    <script>
+        if (window.location.protocol === 'file:') {
+            alert('Warning: This file must be served by an HTTP server to function correctly.');
+        }
+    </script>
+    
+    <style>
+        #save-button {
+            display: none !important;
+        }
+        #filename-input {
+            display: none !important;
+        }
+    </style>
+    <marimo-code hidden="">import%20marimo%0A%0A__generated_with%20%3D%20%220.17.0%22%0Aapp%20%3D%20marimo.App(width%3D%22medium%22%2C%20app_title%3D%22TCID50%20calculation%22)%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_()%3A%0A%20%20%20%20import%20marimo%20as%20mo%0A%20%20%20%20import%20pandas%20as%20pd%0A%20%20%20%20import%20altair%20as%20alt%0A%20%20%20%20import%20numpy%20as%20np%0A%20%20%20%20from%20scipy%20import%20stats%0A%20%20%20%20from%20sklearn.linear_model%20import%20LogisticRegression%0A%20%20%20%20import%20os%0A%20%20%20%20from%20pathlib%20import%20Path%0A%20%20%20%20import%20tomllib%0A%20%20%20%20import%20math%0A%20%20%20%20import%20io%0A%20%20%20%20import%20openpyxl%0A%20%20%20%20return%20alt%2C%20io%2C%20math%2C%20mo%2C%20np%2C%20pd%2C%20stats%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(%0A%20%20%20%20%20%20%20%20r%22%22%22%0A%20%20%20%20%23%20TCID50%20calculation%0A%20%20%20%20%23%23%20Input%20and%20calculation%0A%20%20%20%20This%20marimo%20notebooks%20calculates%20the%20TCID50%20from%20a%20CSV%20file%20of%20the%20following%20structure%3A%0A%0A%20%20%20%20ID%20%7C%20Dilution%20%7C%20CPE%20%7C%20Replicates%20%0A%20%20%20%20---%7C----------%7C-----%7C----------%0A%20%20%20%201%20%20%7C10%20%20%20%20%20%20%20%20%7C%200%20%20%20%7C%208%0A%20%20%20%201%20%20%7C100%20%20%20%20%20%20%20%7C%201%20%20%20%7C%208%0A%20%20%20%201%20%20%7C1000%20%20%20%20%20%20%7C%206%20%20%20%7C%208%0A%20%20%20%201%20%20%7C10000%20%20%20%20%20%7C%208%20%20%20%7C%208%0A%20%20%20%201%20%20%7C100000%20%7C%208%20%7C%208%20%0A%20%20%20%202%20%20%7C10%7C0%7C8%0A%20%20%20%20%7C%7C...%7C%0A%0A%20%20%20%20where%20%22ID%22%20is%20a%20a%20unique%20value%20to%20identify%20the%20sample%2C%20%22Dilution%22%20is%20the%20dilution%20factor%2C%20%22CPE%22%20is%20the%20number%20of%20wells%20showing%20cyptopathic%20effect%20and%20%22Replicates%22%20is%20the%20total%20number%20of%20replicates%20for%20the%20sample%20and%20dilution.%0A%0A%20%20%20%20The%20script%20will%20calculate%20the%20logit%20for%20the%20CPE%20probablity%20(linear%20transformation%20of%20logistic%20curve)%2C%20determine%20the%20x-axis%20intercept%20(corresponding%20to%20p(CPE)%3D0.5)%0A%20%20%20%20For%20each%20value%20without%20a%20valid%20regression%20(zero%20or%20all%20wells%20with%20CPE)%20it%20will%20set%20the%20value%20to%2020%25%20below%20or%20above%20the%20lowest%20or%20highest%20dilution.%20This%20has%20to%20be%20taken%20into%20account%20when%20visualizing%20the%20data.%0A%0A%20%20%20%20%23%23%20Visualization%0A%20%20%20%20The%20script%20generates%20by%20default%20a%20logit(p(CPE))~log10(dilution)%20for%20each%20sample%20and%20saves%20it%20under%20the%20name%20of%20the%20input%20file%20suffixed%20with%20_logitplot.svg.%0A%20%20%20%20Optionally%20you%20can%20provide%20a%20sample%20sheet%20formated%20like%20the%20following%20table%3A%0A%0A%20%20%20%20ID%20%7C%20x%20%7C%20color%20%7C%20facet_row%20%7C%20facet_col%0A%20%20%20%20---%7C----------%7C-----%7C----------%7C%0A%20%20%20%20%20%20%7C%20%20%7C%20%20...%20%20%7C%20%7C%0A%0A%20%20%20%20where%20x%20is%20the%20column%20that%20contains%20the%20values%20for%20the%20x-axis%2C%20color%20the%20values%20for%20the%20coloration%20of%20the%20datapoints%2C%20facet_row%20and%20facet_col%20the%20values%20according%20to%20which%20sub-plots%20should%20be%20generated.%20Note%20that%20the%20column%20headers%20should%20not%20be%20%22x%22%2C%20%22color%22%2C%20%22facet_row%22%2C%20%22facet_col%22%2C%20but%20can%20be%20the%20names%20of%20the%20actual%20parameters%20such%20as%20%22Timepoint%22%2C%20%22Infection%22%2C%20%22Treatment%22%20etc.%20You%20can%20select%20in%20the%20settings%20which%20column%20should%20be%20used%20for%20each%20aspect%20of%20the%20plot%0A%0A%20%20%20%20%23%23%20Output%0A%20%20%20%20Output%20files%20(basename%20%3D%20input%20file%20without%20extension)%3A%0A%20%20%20%201.%20basename%2B%22_TCID50.csv%22%3A%20Table%20with%20calculated%20TCID50%20values%20and%20detection%20limits%0A%20%20%20%202.%20basename%2B%22_logit_plots.svg%22%3A%20All%20regression%20plots%0A%20%20%20%203.%20basename%2B%22_TCID50_overview.svg%22%3A%20Rough%20overview%20of%20log10(TCID50)%2FmL%0A%20%20%20%204.%20basename%2B%22_TCID50_fancy.svg%22%3A%20Fancy%20plot%20is%20sample%20sheet%20and%20grouping%20variables%20were%20provided%0A%20%20%20%20%22%22%22%0A%20%20%20%20)%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(r%22%22%22%23%23%20Input%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(input_sample_sheet%2C%20input_tcid50%2C%20mo)%3A%0A%20%20%20%20mo.vstack(%0A%20%20%20%20%20%20%20%20%5B%0A%20%20%20%20%20%20%20%20%20%20%20%20mo.md(%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22Upload%20the%20TCID50%20data%20file%20formatted%20as%20described%20above%20and%2C%20if%20you%20want%20fancy%20plots%2C%20also%20your%20sample%20sheet%22%0A%20%20%20%20%20%20%20%20%20%20%20%20)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20mo.hstack(%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%5B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20mo.vstack(%5Bmo.md(%22**TCID50%20data%20file**%22)%2C%20input_tcid50%5D)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20mo.vstack(%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%5Bmo.md(%22**sample%20sheet%20file**%22)%2C%20input_sample_sheet%5D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%5D%0A%20%20%20%20%20%20%20%20%20%20%20%20)%2C%0A%20%20%20%20%20%20%20%20%5D%0A%20%20%20%20)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20input_tcid50%20%3D%20mo.ui.file(filetypes%3D%5B%22.xlsx%22%5D)%0A%20%20%20%20input_sample_sheet%20%3D%20mo.ui.file(filetypes%3D%5B%22.xlsx%22%5D)%0A%20%20%20%20return%20input_sample_sheet%2C%20input_tcid50%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(%0A%20%20%20%20%20%20%20%20r%22%22%22%0A%20%20%20%20%23%23%20Settings%0A%20%20%20%20Change%20the%20inputfile%20and%20volume%20variable%20and%20re-run%20all%20cells%0A%20%20%20%20%22%22%22%0A%20%20%20%20)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(color_col%2C%20facet_col_col%2C%20facet_row_col%2C%20mo%2C%20volume%2C%20x_col)%3A%0A%20%20%20%20mo.vstack(%0A%20%20%20%20%20%20%20%20%5B%0A%20%20%20%20%20%20%20%20%20%20%20%20mo.md(%22%23%23%23%20Settings%20for%20TCID50%20calculation%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20volume%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20mo.md(%22%23%23%23%20Settings%20for%20fancy%20plot%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20mo.md(%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22Select%20which%20columns%20of%20the%20sample%20sheet%20definde%20the%20X-axis%2C%20the%20color%20of%20the%20datapoints%2C%20and%20faceting%20by%20row%20and%20col%20(last%203%20optional)%22%0A%20%20%20%20%20%20%20%20%20%20%20%20)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20x_col%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20color_col%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20facet_row_col%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20facet_col_col%2C%0A%20%20%20%20%20%20%20%20%5D%0A%20%20%20%20)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(df_sample_sheet%2C%20mo)%3A%0A%20%20%20%20x_col%20%3D%20mo.ui.dropdown(options%3Ddf_sample_sheet.columns%2C%20label%3D%22X%20column%22)%0A%20%20%20%20color_col%20%3D%20mo.ui.dropdown(%0A%20%20%20%20%20%20%20%20options%3Ddf_sample_sheet.columns%2C%20label%3D%22Color%20column%22%0A%20%20%20%20)%0A%20%20%20%20facet_row_col%20%3D%20mo.ui.dropdown(%0A%20%20%20%20%20%20%20%20options%3Ddf_sample_sheet.columns%2C%20label%3D%22Row%20facet%20column%22%0A%20%20%20%20)%0A%20%20%20%20facet_col_col%20%3D%20mo.ui.dropdown(%0A%20%20%20%20%20%20%20%20options%3Ddf_sample_sheet.columns%2C%20label%3D%22Col%20facet%20column%22%0A%20%20%20%20)%0A%20%20%20%20return%20color_col%2C%20facet_col_col%2C%20facet_row_col%2C%20x_col%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20volume%20%3D%20mo.ui.number(start%3D0%2C%20stop%3D200%2C%20value%3D10%2C%20label%3D%22Volume%20%2F%20Well%22)%0A%20%20%20%20return%20(volume%2C)%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(r%22%22%22%23%23%20TCID50%20calculation%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(input_tcid50%2C%20io%2C%20np%2C%20pd%2C%20stats%2C%20volume)%3A%0A%20%20%20%20%23%20read%20CPE%20values%0A%20%20%20%20df%20%3D%20pd.read_excel(io.BytesIO(input_tcid50.contents()))%0A%20%20%20%20df%20%3D%20df.set_index(%22ID%22)%0A%0A%20%20%20%20basename%20%3D%20%22%22.join(input_tcid50.name().split(%22.%22)%5B%3A-1%5D)%0A%0A%20%20%20%20%23%20apply%20continuity%20correction%20to%20number%20of%20wells%20with%20CPE%0A%20%20%20%20cpe_cont%20%3D%20(df%5B%22CPE%22%5D%20%2B%200.5)%20%2F%20(df%5B%22Replicates%22%5D%20%2B%201)%0A%0A%20%20%20%20%23%20Calculate%20logit%20(for%20linear%20regression%20of%20logistic%20distribution)%0A%20%20%20%20df%5B%22logit%22%5D%20%3D%20np.log(cpe_cont%20%2F%20(1%20-%20cpe_cont))%0A%0A%20%20%20%20%23%20Apply%20volume%20to%20dilution%0A%20%20%20%20df%5B%22Dilution%22%5D%20%3D%20df%5B%22Dilution%22%5D%20%2F%20float(volume.value)%0A%0A%20%20%20%20lower_limit%20%3D%20df.groupby(%22ID%22)%5B%22Dilution%22%5D.min()%0A%20%20%20%20upper_limit%20%3D%20df.groupby(%22ID%22)%5B%22Dilution%22%5D.max()%0A%0A%20%20%20%20%23%20log10%20transform%20Dilution%0A%20%20%20%20df%5B%22Dilution%22%5D%20%3D%20np.log10(df%5B%22Dilution%22%5D)%0A%0A%20%20%20%20%23%20Perform%20linear%20regression%20for%20each%20ID%20seperatly%0A%20%20%20%20linreg%20%3D%20df.groupby(%22ID%22).apply(%0A%20%20%20%20%20%20%20%20lambda%20x%3A%20pd.Series(stats.linregress(x%5B%22Dilution%22%5D%2C%20x%5B%22logit%22%5D)._asdict())%5B%0A%20%20%20%20%20%20%20%20%20%20%20%20%5B%22slope%22%2C%20%22intercept%22%2C%20%22intercept_stderr%22%5D%0A%20%20%20%20%20%20%20%20%5D%2C%0A%20%20%20%20%20%20%20%20include_groups%3DFalse%2C%0A%20%20%20%20)%0A%0A%20%20%20%20%23%20Add%20lower%20and%20upper%20limit%20of%20detection%0A%20%20%20%20linreg%5B%22Upper%20limit%22%5D%20%3D%20linreg.index.map(upper_limit)%0A%20%20%20%20linreg%5B%22Lower%20limit%22%5D%20%3D%20linreg.index.map(lower_limit)%0A%20%20%20%20linreg%5B%22TCID50%2FmL%22%5D%20%3D%2010%20**%20(-linreg%5B%22intercept%22%5D%20%2F%20linreg%5B%22slope%22%5D)%0A%20%20%20%20%23%20Improvemen%3A%20Calculate%20TCID%20for%20all%20(resulting%20in%20%2B-%20inf%20for%20the%20ones%20without%20slope)%20and%20then%20just%20check%20whether%20each%20sample%20is%20outside%20the%20detection%20range%0A%20%20%20%20linreg.loc%5B(linreg%5B%22slope%22%5D%20%3D%3D%200)%2C%20%22outside_detection%22%5D%20%3D%20True%0A%20%20%20%20linreg.loc%5Blinreg%5B%22outside_detection%22%5D.isna()%2C%20%22outside_detection%22%5D%20%3D%20False%0A%20%20%20%20linreg.loc%5B(linreg%5B%22intercept%22%5D%20%3C%200)%20%26%20(linreg%5B%22slope%22%5D%20%3D%3D%200)%2C%20%22TCID50%2FmL%22%5D%20%3D%20(%0A%20%20%20%20%20%20%20%20linreg%5B%22Lower%20limit%22%5D%20*%200.8%0A%20%20%20%20)%0A%20%20%20%20linreg.loc%5B(linreg%5B%22intercept%22%5D%20%3E%200)%20%26%20(linreg%5B%22slope%22%5D%20%3D%3D%200)%2C%20%22TCID50%2FmL%22%5D%20%3D%20(%0A%20%20%20%20%20%20%20%20linreg%5B%22Upper%20limit%22%5D%20*%201.2%0A%20%20%20%20)%0A%20%20%20%20linreg%0A%20%20%20%20return%20basename%2C%20df%2C%20linreg%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(%0A%20%20%20%20%20%20%20%20r%22%22%22%0A%20%20%20%20%23%23%20Dose-Response%20curves%20for%20all%20samples%0A%20%20%20%20Y-axis%20(p(CPE))%20is%20%5Blogit%5D(https%3A%2F%2Fde.wikipedia.org%2Fwiki%2FLogit)-transformed%20(linearisation%20of%20sigmoidalen%20functions)%0A%20%20%20%20%22%22%22%0A%20%20%20%20)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(alt%2C%20basename%2C%20df%2C%20mo)%3A%0A%20%20%20%20_points%20%3D%20(%0A%20%20%20%20%20%20%20%20alt.Chart(df)%0A%20%20%20%20%20%20%20%20.mark_point()%0A%20%20%20%20%20%20%20%20.encode(%0A%20%20%20%20%20%20%20%20%20%20%20%20x%3Dalt.X(%22Dilution%3AQ%22).title(%22Dilution%20%5Blog10%5D%22)%2C%20y%3Dalt.Y(%22logit%3AQ%22)%0A%20%20%20%20%20%20%20%20)%0A%20%20%20%20)%0A%20%20%20%20_reg%20%3D%20_points.transform_regression(%0A%20%20%20%20%20%20%20%20%22Dilution%22%2C%20%22logit%22%2C%20groupby%3D%5B%22ID%22%5D%0A%20%20%20%20).mark_line(size%3D2)%0A%20%20%20%20_hline%20%3D%20(%0A%20%20%20%20%20%20%20%20alt.Chart()%0A%20%20%20%20%20%20%20%20.mark_rule(%0A%20%20%20%20%20%20%20%20%20%20%20%20color%3D%22red%22%2C%0A%20%20%20%20%20%20%20%20)%0A%20%20%20%20%20%20%20%20.encode(y%3Dalt.datum(0))%0A%20%20%20%20)%0A%20%20%20%20_chart%20%3D%20(%0A%20%20%20%20%20%20%20%20(_points%20%2B%20_reg%20%2B%20_hline)%0A%20%20%20%20%20%20%20%20.properties(width%3D100%2C%20height%3D100)%0A%20%20%20%20%20%20%20%20.facet(column%3D%22ID%22)%0A%20%20%20%20)%0A%20%20%20%20_chart.save(basename%20%2B%20%22_logit_charts.svg%22)%0A%20%20%20%20mo.ui.altair_chart(_chart)%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(%0A%20%20%20%20%20%20%20%20r%22%22%22%0A%20%20%20%20%23%23%20TCID50%20for%20all%20samples%0A%20%20%20%20The%20following%20plot%20shows%20the%20log10(TCID50)%20for%20all%20samples.%20Points%20that%20fall%20outside%20the%20limit%20of%20detection%20are%20colored%20gray.%0A%20%20%20%20%22%22%22%0A%20%20%20%20)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(alt%2C%20linreg%2C%20np)%3A%0A%20%20%20%20_linreg%20%3D%20linreg.copy()%0A%20%20%20%20_linreg%5B%22TCID50%2FmL%22%5D%20%3D%20np.log10(_linreg%5B%22TCID50%2FmL%22%5D)%0A%20%20%20%20_chart%20%3D%20(%0A%20%20%20%20%20%20%20%20alt.Chart(_linreg.reset_index())%0A%20%20%20%20%20%20%20%20.mark_point()%0A%20%20%20%20%20%20%20%20.encode(%0A%20%20%20%20%20%20%20%20%20%20%20%20x%3D%22ID%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20y%3Dalt.Y(%22TCID50%2FmL%22).title(%22TCID50%2FmL%20(log10)%22).scale(zero%3DFalse)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20color%3Dalt.when(alt.datum.outside_detection%20%3D%3D%20True).then(%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20alt.value(%22lightgray%22)%0A%20%20%20%20%20%20%20%20%20%20%20%20)%2C%0A%20%20%20%20%20%20%20%20)%0A%20%20%20%20%20%20%20%20.properties(height%3D100%2C%20width%3D20%20%2B%2012%20*%20len(_linreg))%0A%20%20%20%20)%0A%20%20%20%20_chart%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(%0A%20%20%20%20%20%20%20%20r%22%22%22%0A%20%20%20%20%23%23%20Visualization%20according%20to%20sample%20sheet%0A%20%20%20%20The%20following%20plot%20attempts%20a%20visualiztion%20according%20to%20the%20sample%20sheet%0A%20%20%20%20%22%22%22%0A%20%20%20%20)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_()%3A%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(input_sample_sheet%2C%20io%2C%20linreg%2C%20np%2C%20pd)%3A%0A%20%20%20%20df_sample_sheet%20%3D%20pd.read_excel(io.BytesIO(input_sample_sheet.contents()))%0A%20%20%20%20df_sample_sheet_merge%20%3D%20df_sample_sheet.merge(linreg%2C%20on%3D%22ID%22)%0A%20%20%20%20df_sample_sheet_merge%5B%22TCID50%2FmL%22%5D%20%3D%20np.log10(%0A%20%20%20%20%20%20%20%20df_sample_sheet_merge%5B%22TCID50%2FmL%22%5D%0A%20%20%20%20)%0A%20%20%20%20return%20df_sample_sheet%2C%20df_sample_sheet_merge%0A%0A%0A%40app.cell%0Adef%20_(%0A%20%20%20%20alt%2C%0A%20%20%20%20color_col%2C%0A%20%20%20%20df_sample_sheet_merge%2C%0A%20%20%20%20facet_col_col%2C%0A%20%20%20%20facet_row_col%2C%0A%20%20%20%20math%2C%0A%20%20%20%20np%2C%0A%20%20%20%20pd%2C%0A%20%20%20%20x_col%2C%0A)%3A%0A%20%20%20%20limits%20%3D%20(%0A%20%20%20%20%20%20%20%20df_sample_sheet_merge%5B%22Lower%20limit%22%5D.max()%2C%0A%20%20%20%20%20%20%20%20df_sample_sheet_merge%5B%22Upper%20limit%22%5D.min()%2C%0A%20%20%20%20)%0A%0A%20%20%20%20_domain%20%3D%20(%0A%20%20%20%20%20%20%20%20math.floor(df_sample_sheet_merge%5B%22TCID50%2FmL%22%5D.min())%2C%0A%20%20%20%20%20%20%20%20math.ceil(df_sample_sheet_merge%5B%22TCID50%2FmL%22%5D.max())%2C%0A%20%20%20%20)%0A%0A%20%20%20%20_kwargs%20%3D%20%7B%7D%0A%20%20%20%20if%20not%20color_col.value%20is%20None%3A%0A%20%20%20%20%20%20%20%20_kwargs%5B%22color%22%5D%20%3D%20(%0A%20%20%20%20%20%20%20%20%20%20%20%20alt.Color(color_col.value)%0A%20%20%20%20%20%20%20%20%20%20%20%20.sort(df_sample_sheet_merge%5Bcolor_col.value%5D.unique())%0A%20%20%20%20%20%20%20%20%20%20%20%20.scale(scheme%3D%22dark2%22)%0A%20%20%20%20%20%20%20%20)%0A%0A%20%20%20%20_point%20%3D%20(%0A%20%20%20%20%20%20%20%20alt.Chart(df_sample_sheet_merge)%0A%20%20%20%20%20%20%20%20.mark_point(clip%3DTrue)%0A%20%20%20%20%20%20%20%20.encode(%0A%20%20%20%20%20%20%20%20%20%20%20%20x%3Dalt.X(x_col.value).sort(df_sample_sheet_merge%5Bx_col.value%5D.unique())%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20y%3Dalt.Y(%22TCID50%2FmL%22).scale(domain%3D_domain)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20**_kwargs%2C%0A%20%20%20%20%20%20%20%20)%0A%20%20%20%20)%0A%20%20%20%20_line%20%3D%20(%0A%20%20%20%20%20%20%20%20alt.Chart(df_sample_sheet_merge)%0A%20%20%20%20%20%20%20%20.mark_line(clip%3DTrue)%0A%20%20%20%20%20%20%20%20.encode(%0A%20%20%20%20%20%20%20%20%20%20%20%20x%3Dalt.X(x_col.value).sort(df_sample_sheet_merge%5Bx_col.value%5D.unique())%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20y%3Dalt.Y(%22mean(TCID50%2FmL)%22)%0A%20%20%20%20%20%20%20%20%20%20%20%20.title(%22TCID50%2FmL%20(log10)%22)%0A%20%20%20%20%20%20%20%20%20%20%20%20.scale(domain%3D_domain)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20**_kwargs%2C%0A%20%20%20%20%20%20%20%20)%0A%20%20%20%20)%0A%20%20%20%20_lower_limit%20%3D%20(%0A%20%20%20%20%20%20%20%20alt.Chart(%0A%20%20%20%20%20%20%20%20%20%20%20%20pd.DataFrame(%7B%22y1%22%3A%200.5%20*%20_domain%5B0%5D%2C%20%22y2%22%3A%20%5Bnp.log10(limits%5B0%5D)%5D%7D)%0A%20%20%20%20%20%20%20%20)%0A%20%20%20%20%20%20%20%20.mark_rect(opacity%3D0.6%2C%20clip%3DTrue%2C%20color%3D%22WhiteSmoke%22)%0A%20%20%20%20%20%20%20%20.encode(y%3D%22y1%3AQ%22%2C%20y2%3D%22y2%3AQ%22)%0A%20%20%20%20)%0A%20%20%20%20_upper_limit%20%3D%20(%0A%20%20%20%20%20%20%20%20alt.Chart(%0A%20%20%20%20%20%20%20%20%20%20%20%20pd.DataFrame(%7B%22y1%22%3A%20%5Bnp.log10(limits%5B1%5D)%5D%2C%20%22y2%22%3A%202%20*%20_domain%5B1%5D%7D)%0A%20%20%20%20%20%20%20%20)%0A%20%20%20%20%20%20%20%20.mark_rect(opacity%3D0.6%2C%20clip%3DTrue%2C%20color%3D%22WhiteSmoke%22)%0A%20%20%20%20%20%20%20%20.encode(y%3D%22y1%3AQ%22%2C%20y2%3D%22y2%3AQ%22)%0A%20%20%20%20)%0A%20%20%20%20_kwargs%20%3D%20%7B%7D%0A%20%20%20%20if%20not%20facet_col_col.value%20is%20None%3A%0A%20%20%20%20%20%20%20%20_kwargs%5B%22column%22%5D%20%3D%20alt.Column(facet_col_col.value)%0A%20%20%20%20if%20not%20facet_row_col.value%20is%20None%3A%0A%20%20%20%20%20%20%20%20_kwargs%5B%22row%22%5D%20%3D%20alt.Column(facet_row_col.value)%0A%0A%20%20%20%20if%20len(_kwargs)%20%3E%200%3A%0A%20%20%20%20%20%20%20%20_chart%20%3D%20(%0A%20%20%20%20%20%20%20%20%20%20%20%20(_point%20%2B%20_line%20%2B%20_lower_limit%20%2B%20_upper_limit)%0A%20%20%20%20%20%20%20%20%20%20%20%20.properties(width%3D200%2C%20height%3D150)%0A%20%20%20%20%20%20%20%20%20%20%20%20.facet(**_kwargs)%0A%20%20%20%20%20%20%20%20%20%20%20%20.configure_facet(spacing%3D10)%0A%20%20%20%20%20%20%20%20%20%20%20%20.resolve_scale(x%3D%22independent%22)%0A%20%20%20%20%20%20%20%20)%0A%20%20%20%20else%3A%0A%20%20%20%20%20%20%20%20_chart%20%3D%20(_point%20%2B%20_line%20%2B%20_lower_limit%20%2B%20_upper_limit).properties(%0A%20%20%20%20%20%20%20%20%20%20%20%20width%3D200%2C%20height%3D150%0A%20%20%20%20%20%20%20%20)%0A%20%20%20%20_chart%0A%20%20%20%20return%0A%0A%0Aif%20__name__%20%3D%3D%20%22__main__%22%3A%0A%20%20%20%20app.run()%0A</marimo-code></head>
+  <body>
+    <div id="root"></div>
+    <!-- This is a portal for the data editor to render in -->
+    <div id="portal" data-testid="glide-portal" style="position: fixed; left: 0; top: 0; z-index: 9999"></div>
+    <script data-marimo="true">
+      window.__MARIMO_MOUNT_CONFIG__ = {
+            "filename": "notebook.py",
+            "mode": "edit",
+            "version": "0.17.0",
+            "serverToken": "unused",
+            "config": {"ai": {"models": {"custom_models": [], "displayed_models": []}}, "completion": {"activate_on_typing": true, "copilot": false}, "diagnostics": {"sql_linter": true}, "display": {"cell_output": "above", "code_editor_font_size": 14, "dataframes": "rich", "default_table_max_columns": 50, "default_table_page_size": 10, "default_width": "medium", "reference_highlighting": false, "theme": "light"}, "formatting": {"line_length": 79}, "keymap": {"overrides": {}, "preset": "default"}, "language_servers": {"pylsp": {"enable_flake8": false, "enable_mypy": true, "enable_pydocstyle": false, "enable_pyflakes": false, "enable_pylint": false, "enable_ruff": true, "enabled": true}}, "mcp": {"mcpServers": {}, "presets": []}, "package_management": {"manager": "pip"}, "runtime": {"auto_instantiate": true, "auto_reload": "off", "default_sql_output": "auto", "on_cell_change": "autorun", "output_max_bytes": 100000000, "reactive_tests": true, "std_stream_max_bytes": 1000000, "watcher_on_save": "lazy"}, "save": {"autosave": "off", "autosave_delay": 1000, "format_on_save": false}, "server": {"browser": "default", "follow_symlink": false}, "snippets": {"custom_paths": [], "include_default_snippets": true}},
+            "configOverrides": {},
+            "appConfig": {"app_title": "TCID50 calculation", "sql_output": "auto", "width": "medium"},
+            "view": {"showAppCode": false},
+            "notebook": null,
+            "session": null,
+            "runtimeConfig": null,
+        };
+    </script>
+  </body>
+</html>
