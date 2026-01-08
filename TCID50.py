@@ -148,7 +148,7 @@ def _(input_df, mo, np, pd, sm):
                 {
                     "log_TCID50_mL": None,
                     "detection_limit_low": df["Dilution"].min(),
-                    "detection_limit_high": df["Dilution"].max(),
+                    "detection_limit_up": df["Dilution"].max(),
                     "result": None,
                     "message": "below detection limit",
                 }
@@ -158,7 +158,7 @@ def _(input_df, mo, np, pd, sm):
                 {
                     "log_TCID50_mL": None,
                     "detection_limit_low": df["Dilution"].min(),
-                    "detection_limit_high": df["Dilution"].max(),
+                    "detection_limit_up": df["Dilution"].max(),
                     "result": None,
                     "message": "above detection limit",
                 }
@@ -176,7 +176,7 @@ def _(input_df, mo, np, pd, sm):
                 {
                     "log_TCID50_mL": tcid50,
                     "detection_limit_low": df["Dilution"].min(),
-                    "detection_limit_high": df["Dilution"].max(),
+                    "detection_limit_up": df["Dilution"].max(),
                     "result": results,
                     "message": "below detection limit",
                 }
@@ -186,7 +186,7 @@ def _(input_df, mo, np, pd, sm):
                 {
                     "log_TCID50_mL": tcid50,
                     "detection_limit_low": df["Dilution"].min(),
-                    "detection_limit_high": df["Dilution"].max(),
+                    "detection_limit_up": df["Dilution"].max(),
                     "result": results,
                     "message": "above detection limit",
                 }
@@ -195,7 +195,7 @@ def _(input_df, mo, np, pd, sm):
             {
                 "log_TCID50_mL": tcid50,
                 "detection_limit_low": df["Dilution"].min(),
-                "detection_limit_high": df["Dilution"].max(),
+                "detection_limit_up": df["Dilution"].max(),
                 "result": results,
                 "message": None,
             },
@@ -208,7 +208,7 @@ def _(input_df, mo, np, pd, sm):
         ),
         include_groups=False,
     )
-    output_df["log_PFU_mL"] = output_df["log_TCID50_mL"] + np.log10(0.7)
+    output_df["log_PFU_mL"] = output_df["log_TCID50_mL"] + np.log10(np.log(2))
     _table = mo.ui.table(
         data=output_df.drop("result", axis=1),
     )
