@@ -76,6 +76,7 @@ def _(locale, mo):
 @app.cell
 def _(form, io, mo, np, pd):
     def read_input(form):
+        """validate the form input and return the tab separated text or the uploaded file as a pandas DataFrame"""
         mo.stop(
             not form.value,
             mo.callout(
@@ -118,12 +119,22 @@ def _(form, io, mo, np, pd):
                     io.BytesIO(form.value["file"][0].contents),
                 )
                 return input
-            raise ValueError(
-                "File does not have a supported file extension (.csv, .tsv, .xlsx)"
-            )
+        mo.callout(
+            "File does not have a supported file extension (.csv, .tsv, .xlsx)",
+            kind="danger",
+        )
+
+
+    #def validate_dataframe(df):
+    #    if not all(["Dilution", "CPE", "Replicates"] in df.columns):
+    #        mo.callout(
+    #            "Not all of the following columns exist in dataframe: Dilution, #CPE, Replicates",
+    #            kind="danger",
+    #        )
 
 
     input_df = read_input(form)
+    #validate_dataframe(input_df)
     input_df["Dilution"] = input_df["Dilution"] * 1000 / form.value["volumen"]
     input_df["Dilution"] = np.log10(input_df["Dilution"])
     input_df["Fraction"] = input_df["CPE"] / input_df["Replicates"]
@@ -209,8 +220,11 @@ def _(input_df, mo, np, pd, sm):
         include_groups=False,
     )
     output_df["log_PFU_mL"] = output_df["log_TCID50_mL"] + np.log10(np.log(2))
+    output_df["PFU_mL"] = 10 ** output_df["log_PFU_mL"]
+    output_df["TCID50_mL"] = 10 ** output_df["log_TCID50_mL"]
     _table = mo.ui.table(
         data=output_df.drop("result", axis=1),
+        format_mapping={"TCID50_mL": "{:.3e}", "PFU_mL": "{:.3e}"},
     )
     mo.output.replace(_table)
     return (output_df,)
@@ -262,7 +276,7 @@ def _(alt, input_df, pd, predicted):
         )
         .transform_filter(alt.datum.data_source == "observed")
     )
-    (_point + _line).properties(width=100, height=100).facet("ID", columns=5)
+    (_point + _line).properties(width=100, height=100).facet(alt.Facet("ID").sort(input_df["ID"].unique()), columns=5)
     return
 
 
