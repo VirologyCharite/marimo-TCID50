@@ -34,7 +34,7 @@ jobs:
 
             - name: Export notebook
               run: |
-                  marimo export html-wasm notebook.py -o marimo-wasm --mode run
+                  marimo export html-wasm TCID50.py -o marimo-wasm --mode run
 
             - name: Upload Pages Artifact
               uses: actions/upload-pages-artifact@v3
