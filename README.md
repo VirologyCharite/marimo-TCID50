@@ -3,32 +3,32 @@ This notebook calculates the 50% infectious dose (TCID50) using a generalized li
 
 ## Input data
 Prepare your data in a spreadsheet editor in the following format:
-| ID       | Dilution | CPE | Replicates |   |
-|----------|----------|-----|------------|---|
-| Sample 1 | 1.00E+02 | 8   | 8          |   |
-| Sample 1 | 1.00E+03 | 8   | 8          |   |
-| Sample 1 | 1.00E+04 | 8   | 8          |   |
-| Sample 1 | 1.00E+05 | 6   | 8          |   |
-| Sample 1 | 1.00E+06 | 2   | 8          |   |
-| Sample 1 | 1.00E+07 | 0   | 8          |   |
-| Sample 2 | 1.00E+02 | 8   | 8          |   |
-| Sample 2 | 1.00E+03 | 4   | 8          |   |
-| Sample 2 | 1.00E+04 | 0   | 8          |   |
-| Sample 2 | 1.00E+05 | 0   | 8          |   |
-| Sample 2 | 1.00E+06 | 0   | 8          |   |
-| Sample 2 | 1.00E+07 | 0   | 8          |   |
-| Sample 3 | 1.00E+02 | 8   | 8          |   |
-| Sample 3 | 1.00E+03 | 8   | 8          |   |
-| Sample 3 | 1.00E+04 | 8   | 8          |   |
-| Sample 3 | 1.00E+05 | 8   | 8          |   |
-| Sample 3 | 1.00E+06 | 8   | 8          |   |
-| Sample 3 | 1.00E+07 | 8   | 8          |   |
-| Sample 4 | 1.00E+02 | 0   | 8          |   |
-| Sample 4 | 1.00E+03 | 0   | 8          |   |
-| Sample 4 | 1.00E+04 | 0   | 8          |   |
-| Sample 4 | 1.00E+05 | 0   | 8          |   |
-| Sample 4 | 1.00E+06 | 0   | 8          |   |
-| Sample 4 | 1.00E+07 | 0   | 8          |   |
+| ID       | Dilution | CPE | Replicates |
+|----------|----------|-----|------------|
+| Sample 1 | 1.00E+02 | 8   | 8          |
+| Sample 1 | 1.00E+03 | 8   | 8          |
+| Sample 1 | 1.00E+04 | 8   | 8          |
+| Sample 1 | 1.00E+05 | 6   | 8          |
+| Sample 1 | 1.00E+06 | 2   | 8          |
+| Sample 1 | 1.00E+07 | 0   | 8          |
+| Sample 2 | 1.00E+02 | 8   | 8          |
+| Sample 2 | 1.00E+03 | 4   | 8          |
+| Sample 2 | 1.00E+04 | 0   | 8          |
+| Sample 2 | 1.00E+05 | 0   | 8          |
+| Sample 2 | 1.00E+06 | 0   | 8          |
+| Sample 2 | 1.00E+07 | 0   | 8          |
+| Sample 3 | 1.00E+02 | 8   | 8          |
+| Sample 3 | 1.00E+03 | 8   | 8          |
+| Sample 3 | 1.00E+04 | 8   | 8          |
+| Sample 3 | 1.00E+05 | 8   | 8          |
+| Sample 3 | 1.00E+06 | 8   | 8          |
+| Sample 3 | 1.00E+07 | 8   | 8          |
+| Sample 4 | 1.00E+02 | 0   | 8          |
+| Sample 4 | 1.00E+03 | 0   | 8          |
+| Sample 4 | 1.00E+04 | 0   | 8          |
+| Sample 4 | 1.00E+05 | 0   | 8          |
+| Sample 4 | 1.00E+06 | 0   | 8          |
+| Sample 4 | 1.00E+07 | 0   | 8          |
 
 **Columns**
 - ID: A unique ID for each sample you titrated
