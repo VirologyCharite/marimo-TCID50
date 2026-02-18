@@ -1,0 +1,5 @@
+marimo
+numpy
+altair
+statmodels
+pandas
