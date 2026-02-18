@@ -125,7 +125,7 @@ def _(form, io, mo, np, pd):
         )
 
 
-    #def validate_dataframe(df):
+    # def validate_dataframe(df):
     #    if not all(["Dilution", "CPE", "Replicates"] in df.columns):
     #        mo.callout(
     #            "Not all of the following columns exist in dataframe: Dilution, #CPE, Replicates",
@@ -134,7 +134,7 @@ def _(form, io, mo, np, pd):
 
 
     input_df = read_input(form)
-    #validate_dataframe(input_df)
+    # validate_dataframe(input_df)
     input_df["Dilution"] = input_df["Dilution"] * 1000 / form.value["volumen"]
     input_df["Dilution"] = np.log10(input_df["Dilution"])
     input_df["Fraction"] = input_df["CPE"] / input_df["Replicates"]
@@ -213,12 +213,18 @@ def _(input_df, mo, np, pd, sm):
         )
 
 
-    output_df = input_df.groupby("ID").apply(
-        lambda x: calculate_tcid50(
-            x,
-        ),
-        include_groups=False,
+    output_df = (
+        input_df.groupby("ID")
+        .apply(
+            lambda x: calculate_tcid50(
+                x,
+            ),
+            include_groups=False,
+        )
+        .reset_index()
     )
+    output_df["ID"] = pd.Categorical(output_df["ID"], input_df["ID"].unique())
+    output_df = output_df.sort_values("ID")
     output_df["log_PFU_mL"] = output_df["log_TCID50_mL"] + np.log10(np.log(2))
     output_df["PFU_mL"] = 10 ** output_df["log_PFU_mL"]
     output_df["TCID50_mL"] = 10 ** output_df["log_TCID50_mL"]
@@ -242,7 +248,8 @@ def _(np, output_df, pd, sm):
 
 
     predicted = (
-        output_df.dropna(subset=["result"])["result"]
+        output_df.set_index("ID")
+        .dropna(subset=["result"])["result"]
         .apply(lambda x: predict(x))
         .explode(column=["Dilution", "Fraction"])
         .reset_index()
@@ -276,7 +283,9 @@ def _(alt, input_df, pd, predicted):
         )
         .transform_filter(alt.datum.data_source == "observed")
     )
-    (_point + _line).properties(width=100, height=100).facet(alt.Facet("ID").sort(input_df["ID"].unique()), columns=5)
+    (_point + _line).properties(width=100, height=100).facet(
+        alt.Facet("ID").sort(input_df["ID"].unique()), columns=5
+    )
     return
 
 
