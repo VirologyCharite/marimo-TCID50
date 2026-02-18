@@ -1,5 +1,7 @@
 marimo
 numpy
 altair
-statmodels
+statsmodels
 pandas
+
+
