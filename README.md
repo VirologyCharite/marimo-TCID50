@@ -1,5 +1,6 @@
 # TCID50 calculation using marimo
 This notebook calculates the 50% infectious dose (TCID50) using a generalized linear model (GLM).
+You can find an online version of the notebook that does not require you to install python here: [https://virologycharite.github.io/marimo-TCID50/]
 
 ## Input data
 Prepare your data in a spreadsheet editor in the following format:
