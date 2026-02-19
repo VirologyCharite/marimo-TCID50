@@ -18,6 +18,16 @@ def _():
 
 
 @app.cell
+def _(mo):
+    with open("README.md", "r") as f:
+        _readme = f.read()
+    mo.accordion(
+        {"Click here for instructions on how to use the notebook": mo.md(_readme)}
+    )
+    return
+
+
+@app.cell
 def _(locale, mo):
     current_locale = locale.setlocale(locale.LC_NUMERIC)
     locale.setlocale(locale.LC_NUMERIC, "")
