@@ -32,6 +32,11 @@ jobs:
             - name: Install dependencies
               run: pip install -r requirements.txt
 
+            - name: Prepare public assets
+              run: |
+                  mkdir -p public
+                  cp README.md public/
+
             - name: Export notebook
               run: |
                   marimo export html-wasm TCID50.py -o marimo-wasm --mode run

@@ -14,12 +14,17 @@ def _():
     import statsmodels.api as sm
     import numpy as np
     import altair as alt
-    return alt, io, locale, mo, np, pd, sm
+    from pathlib import Path
+    return Path, alt, io, locale, mo, np, pd, sm
 
 
 @app.cell
-def _(mo):
-    with open("README.md", "r") as f:
+def _(Path, mo):
+    readme = Path(mo.notebook_location() / "public" / "README.md")
+    if not readme.is_file():
+        readme = Path(mo.notebook_location() /  "README.md") 
+    mo.stop(not readme.is_file(), "Did not find README.md")
+    with open(str(readme), "r") as f:
         _readme = f.read()
     mo.accordion(
         {"Click here for instructions on how to use the notebook": mo.md(_readme)}
