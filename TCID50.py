@@ -48,16 +48,17 @@ def _(locale, mo):
               background-color: #f1f1f1;
               padding: 10px;
             }}
+            .form_container marimo-text-area {{
+            font-size:xx-large !important;
+            background-color:red;
+            }}
         </style>
         <div class="form_container">
-            <div>
+            <div style="grid-column: span 2 / span 2; ">
             <b>Paste in tab separated data</b>
             {text}
             </div>
-            <div>
-            <b>Or upload excel/csv file</b>
-            {file}
-            </div>
+
             <div style="grid-column: span 2 / span 2; ">
             <b>Settings</b><br>
             {dec}
@@ -95,13 +96,7 @@ def _(form, io, mo, np, pd):
             ),
         )
         mo.stop(
-            form.value["text"] != "" and len(form.value["file"]) > 0,
-            mo.callout(
-                "Both input file and tab separated text provided.", kind="danger"
-            ),
-        )
-        mo.stop(
-            form.value["text"] == "" and len(form.value["file"]) == 0,
+            form.value["text"] == "",
             mo.callout(
                 "Neither input file nor tab separated text provided.",
                 kind="danger",
@@ -111,44 +106,39 @@ def _(form, io, mo, np, pd):
             return pd.read_table(
                 io.StringIO(form.value["text"]), decimal=form.value["dec"]
             )
-        else:
-            if form.value["file"][0].name.endswith(".csv"):
-                input = pd.read_csv(
-                    io.BytesIO(form.value["file"][0].contents),
-                    decimal=form.value["dec"],
-                )
-                return input
-            if form.value["file"][0].name.endswith(".tsv"):
-                input = pd.read_table(
-                    io.BytesIO(form.value["file"][0].contents),
-                    decimal=form.value["dec"],
-                )
-                return input
-            if form.value["file"][0].name.endswith(".xlsx"):
-                input = pd.read_excel(
-                    io.BytesIO(form.value["file"][0].contents),
-                )
-                return input
-        mo.callout(
-            "File does not have a supported file extension (.csv, .tsv, .xlsx)",
-            kind="danger",
-        )
 
 
     # def validate_dataframe(df):
-    #    if not all(["Dilution", "CPE", "Replicates"] in df.columns):
+    #    if not all(["Dilution", "CPE", "Rep"] in df.columns):
     #        mo.callout(
-    #            "Not all of the following columns exist in dataframe: Dilution, #CPE, Replicates",
+    #            "Not all of the following columns exist in dataframe: Dilution, #CPE, Rep",
     #            kind="danger",
     #        )
 
 
     input_df = read_input(form)
+    order = input_df["ID"].unique()
     # validate_dataframe(input_df)
+    input_df = input_df.melt(
+        id_vars="ID",
+    )
+
+    input_df[["Dilution", "variable"]] = input_df["variable"].str.split(
+        " ", expand=True
+    )
+    input_df = input_df.pivot_table(
+        index=["ID", "Dilution"], columns="variable", values="value"
+    ).reset_index()
+    input_df = input_df.dropna()
+    input_df["Dilution"] = input_df["Dilution"].astype(float)
     input_df["Dilution"] = input_df["Dilution"] * 1000 / form.value["volumen"]
     input_df["Dilution"] = np.log10(input_df["Dilution"])
-    input_df["Fraction"] = input_df["CPE"] / input_df["Replicates"]
-    return (input_df,)
+    input_df = input_df[input_df["CPE"] != ""]
+    input_df["CPE"] = input_df["CPE"].astype(int)
+    input_df["Rep"] = input_df["Rep"].astype(int)
+    input_df["Fraction"] = input_df["CPE"] / input_df["Rep"]
+    input_df
+    return input_df, order
 
 
 @app.cell
@@ -160,7 +150,7 @@ def _(mo):
 
 
 @app.cell
-def _(input_df, mo, np, pd, sm):
+def _(input_df, mo, np, order, pd, sm):
     def calculate_tcid50(
         df,
     ):
@@ -174,7 +164,7 @@ def _(input_df, mo, np, pd, sm):
                     "message": "below detection limit",
                 }
             )
-        if all(df["CPE"] == df["Replicates"]):
+        if all(df["CPE"] == df["Rep"]):
             return pd.Series(
                 {
                     "log_TCID50_mL": None,
@@ -185,10 +175,8 @@ def _(input_df, mo, np, pd, sm):
                 }
             )
         X = sm.add_constant(df["Dilution"])
-        y = df["CPE"] / df["Replicates"]
-        model = sm.GLM(
-            y, X, family=sm.families.Binomial(), freq_weights=df["Replicates"]
-        )
+        y = df["CPE"] / df["Rep"]
+        model = sm.GLM(y, X, family=sm.families.Binomial(), freq_weights=df["Rep"])
         results = model.fit()
         beta_0, beta_1 = results.params
         tcid50 = -beta_0 / beta_1
@@ -233,11 +221,24 @@ def _(input_df, mo, np, pd, sm):
         )
         .reset_index()
     )
-    output_df["ID"] = pd.Categorical(output_df["ID"], input_df["ID"].unique())
+    output_df["ID"] = pd.Categorical(output_df["ID"], order)
     output_df = output_df.sort_values("ID")
     output_df["log_PFU_mL"] = output_df["log_TCID50_mL"] + np.log10(np.log(2))
     output_df["PFU_mL"] = 10 ** output_df["log_PFU_mL"]
     output_df["TCID50_mL"] = 10 ** output_df["log_TCID50_mL"]
+    output_df = output_df[
+        [
+            "ID",
+            "detection_limit_low",
+            "detection_limit_up",
+            "log_TCID50_mL",
+            "log_PFU_mL",
+            "TCID50_mL",
+            "PFU_mL",
+            "message",
+            "result",
+        ]
+    ]
     _table = mo.ui.table(
         data=output_df.drop("result", axis=1),
         format_mapping={"TCID50_mL": "{:.3e}", "PFU_mL": "{:.3e}"},
@@ -268,7 +269,12 @@ def _(np, output_df, pd, sm):
 
 
 @app.cell
-def _(alt, input_df, pd, predicted):
+def _():
+    return
+
+
+@app.cell
+def _(alt, input_df, order, pd, predicted):
     _concat_data = pd.concat(
         [
             predicted.assign(data_source="predicted"),
@@ -294,7 +300,7 @@ def _(alt, input_df, pd, predicted):
         .transform_filter(alt.datum.data_source == "observed")
     )
     (_point + _line).properties(width=100, height=100).facet(
-        alt.Facet("ID").sort(input_df["ID"].unique()), columns=5
+        alt.Facet("ID").sort(order), columns=5
     )
     return
 
