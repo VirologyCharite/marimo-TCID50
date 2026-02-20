@@ -34,7 +34,7 @@ jobs:
 
             - name: Prepare public assets
               run: |
-                  mkdir -p public
+                  mkdir -p marimo-wasm/public
                   cp README.md public/
 
             - name: Export notebook
