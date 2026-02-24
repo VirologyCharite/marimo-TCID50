@@ -20,16 +20,9 @@ def _():
 
 @app.cell
 def _(Path, mo):
-    readme = Path(mo.notebook_location() / "public" / "README.md")
-    mo.stop(not readme.is_file(), f"Did not find README.md in {str(readme)}")
-    if not readme.is_file():
-        readme = Path(mo.notebook_location() /  "README.md") 
-    mo.stop(not readme.is_file(), f"Did not find README.md in {str(readme)}")
-    with open(str(readme), "r") as f:
-        _readme = f.read()
-    mo.accordion(
-        {"Click here for instructions on how to use the notebook": mo.md(_readme)}
-    )
+    mo.md("""
+    Click here for usage instructions: https://github.com/VirologyCharite/marimo-TCID50
+    """)
     return
 
 
