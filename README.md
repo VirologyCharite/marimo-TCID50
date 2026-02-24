@@ -12,9 +12,10 @@ Each sample has one row. For each pre-dilution there are two columns: One in whi
 You can download a sample sheet here: https://github.com/VirologyCharite/marimo-TCID50/raw/refs/heads/main/TCID50.xlsx
 
 **Settings**
+
 In the notebook you can further set the volume in µl of virus dilution per well and the decimal separator for input 
 
-** Instructions in one image: **
+**Instructions in one image:**
 
 ![gui overview](https://github.com/VirologyCharite/marimo-TCID50/raw/refs/heads/main/docs/gui.jpeg)
 
