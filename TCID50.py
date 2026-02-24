@@ -21,6 +21,7 @@ def _():
 @app.cell
 def _(Path, mo):
     readme = Path(mo.notebook_location() / "public" / "README.md")
+    mo.stop(not readme.is_file(), f"Did not find README.md in {str(readme)}")
     if not readme.is_file():
         readme = Path(mo.notebook_location() /  "README.md") 
     mo.stop(not readme.is_file(), f"Did not find README.md in {str(readme)}")
