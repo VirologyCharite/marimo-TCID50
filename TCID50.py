@@ -23,7 +23,7 @@ def _(Path, mo):
     readme = Path(mo.notebook_location() / "public" / "README.md")
     if not readme.is_file():
         readme = Path(mo.notebook_location() /  "README.md") 
-    mo.stop(not readme.is_file(), "Did not find README.md")
+    mo.stop(not readme.is_file(), f"Did not find README.md in {str(readme)}")
     with open(str(readme), "r") as f:
         _readme = f.read()
     mo.accordion(
