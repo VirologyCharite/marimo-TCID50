@@ -1,0 +1,27 @@
+name: tests
+
+# Run the notebook's test cells on every push and PR
+on:
+  push:
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Export dependencies from notebook's inline metadata
+        run: uv export --script TCID50.py --format requirements.txt --no-hashes -o /tmp/requirements-test.txt
+
+      - name: Run notebook tests
+        run: uv run --with-requirements /tmp/requirements-test.txt pytest TCID50.py -v

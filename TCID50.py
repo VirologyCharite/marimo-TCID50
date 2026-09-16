@@ -1,6 +1,18 @@
+# /// script
+# requires-python = ">=3.14"
+# dependencies = [
+#     "altair==6.2.2",
+#     "marimo>=0.24.2",
+#     "numpy==2.5.3",
+#     "pandas==3.0.5",
+#     "pytest==9.1.1",
+#     "statsmodels==0.15.0",
+# ]
+# ///
+
 import marimo
 
-__generated_with = "0.18.4"
+__generated_with = "0.24.2"
 app = marimo.App(width="medium")
 
 
@@ -12,14 +24,16 @@ def _():
     import io
     import traceback
     import statsmodels.api as sm
+    import pytest
     import numpy as np
     import altair as alt
     from pathlib import Path
-    return Path, alt, io, locale, mo, np, pd, sm
+
+    return alt, io, locale, mo, np, pd, pytest, sm
 
 
 @app.cell
-def _(Path, mo):
+def _(mo):
     mo.md("""
     Click here for usage instructions: https://github.com/VirologyCharite/marimo-TCID50
     """)
@@ -53,14 +67,13 @@ def _(locale, mo):
             }}
         </style>
         <div class="form_container">
-            <div style="grid-column: span 2 / span 2; ">
+            <div style="grid-column: span 1 / span 2; ">
             <b>Paste in tab separated data</b>
             {text}
             </div>
 
-            <div style="grid-column: span 2 / span 2; ">
+            <div style="grid-column: span 1 / span 2; ">
             <b>Settings</b><br>
-            {dec}
             <br>
             {volumen}
             </div>
@@ -70,11 +83,6 @@ def _(locale, mo):
         .batch(
             text=mo.ui.text_area(full_width=True),
             file=mo.ui.file(kind="area"),
-            dec=mo.ui.dropdown(
-                options=[".", ","],
-                value=decimal_separator,
-                label="Decimal separator: ",
-            ),
             volumen=mo.ui.number(value=10, start=1, label="Volume/Well [µL]:"),
         )
         .form(show_clear_button=True, bordered=False)
@@ -103,9 +111,8 @@ def _(form, io, mo, np, pd):
         )
         if form.value["text"] != "":
             return pd.read_table(
-                io.StringIO(form.value["text"]), decimal=form.value["dec"]
+                io.StringIO(form.value["text"]), 
             )
-
 
     # def validate_dataframe(df):
     #    if not all(["Dilution", "CPE", "Rep"] in df.columns):
@@ -114,28 +121,13 @@ def _(form, io, mo, np, pd):
     #            kind="danger",
     #        )
 
-
     input_df = read_input(form)
+    input_df["Dilution"] = input_df["Dilution"]*1000/form.value["volumen"]
+    input_df["Dilution"] = np.log10(input_df["Dilution"])
     order = input_df["ID"].unique()
     # validate_dataframe(input_df)
-    input_df = input_df.melt(
-        id_vars="ID",
-    )
-
-    input_df[["Dilution", "variable"]] = input_df["variable"].str.split(
-        " ", expand=True
-    )
-    input_df = input_df.pivot_table(
-        index=["ID", "Dilution"], columns="variable", values="value"
-    ).reset_index()
     input_df = input_df.dropna()
-    input_df["Dilution"] = input_df["Dilution"].astype(float)
-    input_df["Dilution"] = input_df["Dilution"] * 1000 / form.value["volumen"]
-    input_df["Dilution"] = np.log10(input_df["Dilution"])
-    input_df = input_df[input_df["CPE"] != ""]
-    input_df["CPE"] = input_df["CPE"].astype(int)
-    input_df["Rep"] = input_df["Rep"].astype(int)
-    input_df["Fraction"] = input_df["CPE"] / input_df["Rep"]
+    input_df["Fraction"] = input_df["CPE"] / input_df["Total"]
     input_df
     return input_df, order
 
@@ -149,7 +141,7 @@ def _(mo):
 
 
 @app.cell
-def _(input_df, mo, np, order, pd, sm):
+def calculate_tcid50(np, pd, sm):
     def calculate_tcid50(
         df,
     ):
@@ -163,7 +155,7 @@ def _(input_df, mo, np, order, pd, sm):
                     "message": "below detection limit",
                 }
             )
-        if all(df["CPE"] == df["Rep"]):
+        if all(df["CPE"] == df["Total"]):
             return pd.Series(
                 {
                     "log_TCID50_mL": None,
@@ -174,8 +166,10 @@ def _(input_df, mo, np, order, pd, sm):
                 }
             )
         X = sm.add_constant(df["Dilution"])
-        y = df["CPE"] / df["Rep"]
-        model = sm.GLM(y, X, family=sm.families.Binomial(), freq_weights=df["Rep"])
+        y = df["CPE"] / df["Total"]
+        model = sm.GLM(
+            y, X, family=sm.families.Binomial(), freq_weights=df["Total"]
+        )
         results = model.fit()
         beta_0, beta_1 = results.params
         tcid50 = -beta_0 / beta_1
@@ -209,7 +203,11 @@ def _(input_df, mo, np, order, pd, sm):
             },
         )
 
+    return (calculate_tcid50,)
 
+
+@app.cell
+def _(calculate_tcid50, input_df, mo, np, order, pd):
     output_df = (
         input_df.groupby("ID")
         .apply(
@@ -247,7 +245,7 @@ def _(input_df, mo, np, order, pd, sm):
 
 
 @app.cell
-def _(np, output_df, pd, sm):
+def predict(np, pd, sm):
     def predict(result):
         xmin = result.model.data.orig_exog["Dilution"].min()
         xmax = result.model.data.orig_exog["Dilution"].max()
@@ -256,7 +254,11 @@ def _(np, output_df, pd, sm):
         y = result.predict(X)
         return pd.Series({"Dilution": x, "Fraction": y})
 
+    return (predict,)
 
+
+@app.cell
+def _(output_df, predict):
     predicted = (
         output_df.set_index("ID")
         .dropna(subset=["result"])["result"]
@@ -284,7 +286,9 @@ def _(alt, input_df, order, pd, predicted):
         alt.Chart(_concat_data)
         .mark_line()
         .encode(
-            x=alt.X("Dilution:Q").scale(domainMin=_concat_data["Dilution"].min()),
+            x=alt.X("Dilution:Q").scale(
+                domainMin=_concat_data["Dilution"].min()
+            ),
             y=alt.Y("Fraction:Q"),
         )
         .transform_filter(alt.datum.data_source == "predicted")
@@ -293,7 +297,9 @@ def _(alt, input_df, order, pd, predicted):
         alt.Chart(_concat_data)
         .mark_point()
         .encode(
-            x=alt.X("Dilution").scale(domainMin=_concat_data["Dilution"].min()),
+            x=alt.X("Dilution").scale(
+                domainMin=_concat_data["Dilution"].min()
+            ),
             y=alt.Y("Fraction"),
         )
         .transform_filter(alt.datum.data_source == "observed")
@@ -301,6 +307,97 @@ def _(alt, input_df, order, pd, predicted):
     (_point + _line).properties(width=100, height=100).facet(
         alt.Facet("ID").sort(order), columns=5
     )
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    **Tests**
+    """)
+    return
+
+
+@app.cell
+def test_calculate_tcid50_below_detection_limit(calculate_tcid50, pd):
+    def test_calculate_tcid50_below_detection_limit():
+        df = pd.DataFrame(
+            {
+                "Dilution": [2, 3, 4, 5, 6],
+                "CPE": [0, 0, 0, 0, 0],
+                "Total": [8, 8, 8, 8, 8],
+            }
+        )
+        result = calculate_tcid50(df)
+        assert result["message"] == "below detection limit"
+        assert result["log_TCID50_mL"] is None
+        assert result["result"] is None
+        assert result["detection_limit_low"] == 2
+        assert result["detection_limit_up"] == 6
+
+    return
+
+
+@app.cell
+def test_calculate_tcid50_above_detection_limit(calculate_tcid50, pd):
+    def test_calculate_tcid50_above_detection_limit():
+        df = pd.DataFrame(
+            {
+                "Dilution": [2, 3, 4, 5, 6],
+                "CPE": [8, 8, 8, 8, 8],
+                "Total": [8, 8, 8, 8, 8],
+            }
+        )
+        result = calculate_tcid50(df)
+        assert result["message"] == "above detection limit"
+        assert result["log_TCID50_mL"] is None
+        assert result["result"] is None
+
+    return
+
+
+@app.cell
+def test_calculate_tcid50_typical_fit(calculate_tcid50, pd, pytest):
+    def test_calculate_tcid50_typical_fit():
+        df = pd.DataFrame(
+            {
+                "Dilution": [2, 3, 4, 5, 6],
+                "CPE": [8, 8, 6, 2, 0],
+                "Total": [8, 8, 8, 8, 8],
+            }
+        )
+        result = calculate_tcid50(df)
+        assert result["message"] is None
+        assert result["result"] is not None
+        assert result["log_TCID50_mL"] == pytest.approx(4.501, abs=0.01)
+        assert (
+            df["Dilution"].min()
+            < result["log_TCID50_mL"]
+            < df["Dilution"].max()
+        )
+
+    return
+
+
+@app.cell
+def test_predict_matches_fit_range(calculate_tcid50, pd, predict, pytest):
+    def test_predict_matches_fit_range():
+        df = pd.DataFrame(
+            {
+                "Dilution": [2, 3, 4, 5, 6],
+                "CPE": [8, 8, 6, 2, 0],
+                "Total": [8, 8, 8, 8, 8],
+            }
+        )
+        fit = calculate_tcid50(df)
+        curve = predict(fit["result"])
+        assert list(curve.index) == ["Dilution", "Fraction"]
+        assert len(curve["Dilution"]) == 200
+        assert len(curve["Fraction"]) == 200
+        assert curve["Dilution"].min() == pytest.approx(df["Dilution"].min())
+        assert curve["Dilution"].max() == pytest.approx(df["Dilution"].max())
+        assert ((curve["Fraction"] >= 0) & (curve["Fraction"] <= 1)).all()
+
     return
 
 
