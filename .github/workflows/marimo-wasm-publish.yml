@@ -23,14 +23,8 @@ jobs:
             - name: Checkout repo
               uses: actions/checkout@v4
 
-            - name: Set up Python
-              uses: actions/setup-python@v5
-              with:
-                python-version: "3.13.9"
-
-
-            - name: Install dependencies
-              run: pip install -r requirements.txt
+            - name: Install uv
+              uses: astral-sh/setup-uv@v5
 
             - name: Prepare public assets
               run: |
@@ -39,7 +33,7 @@ jobs:
 
             - name: Export notebook
               run: |
-                  marimo export html-wasm TCID50.py -o marimo-wasm --mode run
+                  uvx marimo export html-wasm --sandbox TCID50.py -o marimo-wasm --mode run
 
             - name: Upload Pages Artifact
               uses: actions/upload-pages-artifact@v3
