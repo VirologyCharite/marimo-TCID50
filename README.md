@@ -5,19 +5,27 @@ You can find an online version of the notebook that does not require you to inst
 ## Input data
 Prepare your data in a spreadsheet editor in the following format:
 
-![excel table template](https://github.com/VirologyCharite/marimo-TCID50/raw/refs/heads/main/docs/table.png)
+| ID       | 10 | 100 | 1000 | 10000 | 100000 | 1000000 |
+|----------|----|-----|------|-------|--------|---------|
+| sample_1 | 6  | 6   | 6    | 4     | 1      | 0       |
+| sample_2 | 6  | 6   | 3    | 0     | 0      | 0       |
+| sample_3 | 6  | 5   | 2    | 0     |        |         |
+| sample_4 |    |     | 6    | 6     | 5      | 2       |
+| mock     | 0  | 0   | 0    | 0     | 0      | 0       |
 
-Each sample has one row. For each pre-dilution there are two columns: One in which you put the number of wells with CPE and another in which you put the total number of replicates (usually the same across an experiment). The script will discard columns with no CPE value - so just leave empty dilutions that you did not do for a given sample
+Each sample has one row. The first column must be named `ID`. Every other column is one dilution: the header is the dilution factor as a linear number (1, 10, 100... not the log value 0, 1, 2) and the cells contain the number of wells with CPE. Leave the cells of dilutions that you did not do for a given sample empty - they are discarded.
 
-You can download a sample sheet here: https://github.com/VirologyCharite/marimo-TCID50/raw/refs/heads/main/TCID50.xlsx
+You can download an example table here: https://github.com/VirologyCharite/marimo-TCID50/raw/refs/heads/main/TCID50_example.tsv
 
-**Settings**
+**Usage**
 
-In the notebook you can further set the volume in µl of virus dilution per well and the decimal separator for input 
+1. Copy the table including the header from your spreadsheet editor and paste it into the text box
+2. Set the volume of virus dilution per well in µL and the number of replicates per dilution (the same for all samples and dilutions)
+3. Press submit
+4. Check the table that appears below the form. You can correct single values directly in this table, the results update immediately. Pressing submit again resets the table to the pasted data
+5. Download the results table and the regression curves
 
-**Instructions in one image:**
-
-![gui overview](https://github.com/VirologyCharite/marimo-TCID50/raw/refs/heads/main/docs/gui.jpeg)
+The notebook stops with an error message if the input cannot be used, e.g. if the `ID` column is missing, a column header is duplicated, there are fewer than two dilution columns or a CPE count is higher than the number of replicates.
 
 
 ## Calculation
@@ -30,8 +38,11 @@ For each ID a plot is created to visualize the dose-response curve.
 1. Output table
 The output table contains the following columns:
 1. ID
-2. log_TCID50_mL: log10 transformed TCID50/mL. NaN if all or none of the wells over all dilutions have CPE.
-3. detection_limit_low / detection_limit_up: The lower and upper detection limit for each ID defined as the lowest and the highest dilution
-4. message: Short info about the calculation
-5. log_PFU_mL: log_TCID50_mL+log10(ln(2))
-The regression can occasionally report a TCID50/mL outside of the detection range. This can occur if the highest dilution has < 50% CPE or the highest dilution > 50% CPE. 
+2. detection_limit_low / detection_limit_up: The lower and upper detection limit for each ID defined as the lowest and the highest dilution
+3. log_TCID50_mL: log10 transformed TCID50/mL. NaN if no titre could be calculated (see message).
+4. log_PFU_mL: log_TCID50_mL+log10(ln(2))
+5. TCID50_mL / PFU_mL: The same values on a linear scale
+6. message: Short info about the calculation
+    - below / above detection limit: None or all of the wells over all dilutions have CPE, or the regression reports a TCID50/mL outside of the detection range. The latter can occur if the lowest dilution has < 50% CPE or the highest dilution > 50% CPE.
+    - no fit possible: The number of wells with CPE is the same at every dilution, or only one dilution is left for this ID
+    - no titre: The number of wells with CPE does not decrease with the dilution. Check the order of your dilutions.
